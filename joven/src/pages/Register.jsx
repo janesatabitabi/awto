@@ -24,8 +24,40 @@ const Register = () => {
     }));
   };
 
+  const validateForm = () => {
+    const { name, email, password, address, gender, birthday } = formData;
+
+    if (!name || !email || !password || !address || !gender || !birthday) {
+      alert('All fields are required.');
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('Invalid email format.');
+      return false;
+    }
+
+    if (password.length < 6) {
+      alert('Password must be at least 6 characters.');
+      return false;
+    }
+
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    if (birthDate > today) {
+      alert('Birthday cannot be in the future.');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     try {
       const { user } = await createUserWithEmailAndPassword(
         auth,
