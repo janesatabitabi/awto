@@ -3,11 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const LoginSection = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -41,6 +43,7 @@ const LoginSection = () => {
   return (
     <form className="login-form" onSubmit={handleLogin}>
       <h2>Login</h2>
+      
       <label htmlFor="email" className="form-label">Email</label>
       <input
         type="email"
@@ -51,16 +54,28 @@ const LoginSection = () => {
         placeholder="Enter email"
         required
       />
+      
       <label htmlFor="password" className="form-label">Password</label>
-      <input
-        type="password"
-        id="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="form-input"
-        placeholder="Enter password"
-        required
-      />
+      <div className="password-wrapper">
+        <input
+          type={showPassword ? 'text' : 'password'}
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="form-input"
+          placeholder="Enter password"
+          required
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="toggle-password"
+          aria-label="Toggle password visibility"
+        >
+          {showPassword ? <FiEyeOff /> : <FiEye />}
+        </button>
+      </div>
+
       <button type="submit" className="login-button">Login</button>
 
       <p className="create-account-text" onClick={() => navigate('/register')}>

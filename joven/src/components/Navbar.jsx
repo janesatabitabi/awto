@@ -8,15 +8,16 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <div className="left-nav">
+      <div className="left-nav" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
         <img src={jovenLogo} alt="Joven Tire Logo" className="logo" />
         <span className="brand-name">Joven Tire Enterprise</span>
       </div>
       <div className="right-nav">
         <a href="#home" className="nav-link">Home</a>
+        <a href="#Brand" className="nav-link">Brand</a>
         <a href="#about" className="nav-link">About</a>
         <a href="#services" className="nav-link">Services</a>
-        <button className="create-account-button" onClick={() => navigate('/register')}>
+        <button className='create-account-button' onClick={() => navigate('/register')}>
           Create an account
         </button>
       </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import Navbar from '../components/Navbar'; // ✅ Import the Navbar
 import '../styles/LandingPage.css';
 
 const Register = () => {
@@ -83,88 +84,95 @@ const Register = () => {
   };
 
   return (
-    <div className="login-form" style={{ maxWidth: '500px', margin: '4rem auto' }}>
-      <h2 style={{ marginBottom: '1.5rem' }}>Create an Account</h2>
-      <form onSubmit={handleRegister}>
-        <label className="form-label" htmlFor="name">Name:</label>
-        <input
-          id="name"
-          className="form-input"
-          type="text"
-          name="name"
-          required
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Enter your full name"
-        />
+    <>
+      <Navbar />
+      <div className="login-form" style={{ maxWidth: '500px', margin: '4rem auto' }}>
+        <h2 style={{ marginBottom: '1.5rem' }}>Create an Account</h2>
+        <form onSubmit={handleRegister}>
+          <label className="form-label" htmlFor="name">Name:</label>
+          <input
+            id="name"
+            className="form-input"
+            type="text"
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            placeholder="Enter your full name"
+          />
 
-        <label className="form-label" htmlFor="email">Email:</label>
-        <input
-          id="email"
-          className="form-input"
-          type="email"
-          name="email"
-          required
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Enter your email"
-        />
+          <label className="form-label" htmlFor="email">Email:</label>
+          <input
+            id="email"
+            className="form-input"
+            type="email"
+            name="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="Enter your email"
+          />
 
-        <label className="form-label" htmlFor="password">Password:</label>
-        <input
-          id="password"
-          className="form-input"
-          type="password"
-          name="password"
-          required
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Create a password"
-        />
+          <label className="form-label" htmlFor="password">Password:</label>
+          <input
+            id="password"
+            className="form-input"
+            type="password"
+            name="password"
+            required
+            value={formData.password}
+            onChange={handleChange}
+            placeholder="Create a password"
+          />
 
-        <label className="form-label" htmlFor="address">Address:</label>
-        <input
-          id="address"
-          className="form-input"
-          type="text"
-          name="address"
-          required
-          value={formData.address}
-          onChange={handleChange}
-          placeholder="Enter your address"
-        />
+          <label className="form-label" htmlFor="address">Address:</label>
+          <input
+            id="address"
+            className="form-input"
+            type="text"
+            name="address"
+            required
+            value={formData.address}
+            onChange={handleChange}
+            placeholder="Enter your address"
+          />
 
-        <label className="form-label" htmlFor="gender">Gender:</label>
-        <select
-          id="gender"
-          className="form-input"
-          name="gender"
-          required
-          value={formData.gender}
-          onChange={handleChange}
-        >
-          <option value="">Select Gender</option>
-          <option value="Male">Male</option>
-          <option value="Female">Female</option>
-          <option value="Other">Other</option>
-        </select>
+          <label className="form-label" htmlFor="gender">Gender:</label>
+          <select
+            id="gender"
+            className="form-input"
+            name="gender"
+            required
+            value={formData.gender}
+            onChange={handleChange}
+          >
+            <option value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
 
-        <label className="form-label" htmlFor="birthday">Birthday:</label>
-        <input
-          id="birthday"
-          className="form-input"
-          type="date"
-          name="birthday"
-          required
-          value={formData.birthday}
-          onChange={handleChange}
-        />
+          <label className="form-label" htmlFor="birthday">Birthday:</label>
+          <input
+            id="birthday"
+            className="form-input"
+            type="date"
+            name="birthday"
+            required
+            value={formData.birthday}
+            onChange={handleChange}
+          />
 
-        <button className="login-button" type="submit" style={{ marginTop: '1.5rem', width: '100%' }}>
-          Register
-        </button>
-      </form>
-    </div>
+          <button
+            className="login-button"
+            type="submit"
+            style={{ marginTop: '1.5rem', width: '100%' }}
+          >
+            Register
+          </button>
+        </form>
+      </div>
+    </>
   );
 };
 

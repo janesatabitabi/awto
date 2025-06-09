@@ -53,6 +53,11 @@
   transition: background-color 0.3s ease;
 }
 
+.hidden {
+  display: none !important;
+}
+
+
 /* Main Content */
 .main-content {
   display: flex;
@@ -128,3 +133,25 @@
   font-weight: 600;
   text-decoration: underline;
 }
+
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .form-input {
+  flex: 1;
+  padding-right: 40px; /* add space for icon */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 1.2rem;
+}
+  
