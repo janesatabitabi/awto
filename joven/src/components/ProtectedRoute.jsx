@@ -1,4 +1,4 @@
-// src/components/ProtectedRoute.jsx
+  // src/components/ProtectedRoute.jsx
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { auth, db } from '../firebase'; // your firebase config

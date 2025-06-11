@@ -1,9 +1,10 @@
+// Navbar.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import jovenLogo from '../assets/jovenlogo.png';
 import '../styles/LandingPage.css';
 
-const Navbar = () => {
+const Navbar = ({ hideCreateAccount, showLogout, handleLogout }) => {
   const navigate = useNavigate();
 
   return (
@@ -17,9 +18,18 @@ const Navbar = () => {
         <a href="#Brand" className="nav-link">Brand</a>
         <a href="#about" className="nav-link">About</a>
         <a href="#services" className="nav-link">Services</a>
-        <button className='create-account-button' onClick={() => navigate('/register')}>
-          Create an account
-        </button>
+
+        {!hideCreateAccount && (
+          <button className='create-account-button' onClick={() => navigate('/register')}>
+            Create an account
+          </button>
+        )}
+
+        {showLogout && (
+          <button className='logout-button' onClick={handleLogout}>
+            Logout
+          </button>
+        )}
       </div>
     </nav>
   );

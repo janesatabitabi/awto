@@ -1,0 +1,84 @@
+.filters {
+  width: 100%;
+  max-width: 280px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-family: sans-serif;
+}
+
+/* Responsive layout: full width on small screens */
+@media (max-width: 768px) {
+  .filters {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filters-header h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.filter-header {
+  font-weight: 600;
+  color: #444;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.filter-header:hover {
+  background-color: #f9f9f9;
+}
+
+.filter-content {
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.filter-option {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-option:hover {
+  background-color: #f0f0f0;
+}
+
+.filter-option.selected {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #007bff;
+}
