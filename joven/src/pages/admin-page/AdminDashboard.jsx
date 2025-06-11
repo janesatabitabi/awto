@@ -22,6 +22,7 @@ const AdminDashboard = () => {
     { path: '', label: 'Dashboard' },
     { path: 'sales', label: 'Sales' },
     { path: 'inventory', label: 'Inventory' },
+    { path: 'products', label: 'Products' },
     { path: 'staffs', label: 'Staffs' },
     { path: 'customers', label: 'Customers' },
     { path: 'reservations', label: 'Reservations' },
