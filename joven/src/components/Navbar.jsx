@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import jovenLogo from '../assets/jovenlogo.png';
 import '../styles/LandingPage.css';

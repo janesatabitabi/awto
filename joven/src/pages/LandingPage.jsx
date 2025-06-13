@@ -8,8 +8,7 @@ const LandingPage = () => {
       <Navbar />
       <main className="main-content">
 
-        // Fitment
-
+        {/* Fitment */}
         <section id="fitment" className="section fitment-section">
           <div className="fitment-overlay">
             <div className="fitment-heading">
@@ -49,18 +48,19 @@ const LandingPage = () => {
           </div>
         </section>
 
-        // Brands
-
+        {/* Brands */}
         <section id="brand" className="section brand-section">
           <h2>Brand</h2>
           <p>Showcase brands here...</p>
         </section>
 
+        {/* Services */}
         <section id="services" className="section services-section">
           <h2>Services</h2>
           <p>List your services here...</p>
         </section>
 
+        {/* About */}
         <section id="about" className="section about-section">
           <h2>About Us</h2>
           <p>Information about Joven Tire Enterprise...</p>

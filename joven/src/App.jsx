@@ -102,9 +102,7 @@ function App() {
         <Route
           path="/"
           element={
-            <RedirectIfAuthenticated>
-              <LandingPage />
-            </RedirectIfAuthenticated>
+              <LandingPage />        
           }
         />
         <Route
