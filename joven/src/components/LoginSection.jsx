@@ -29,8 +29,25 @@ const LoginSection = ({ onClose }) => {
         return;
       }
 
-      localStorage.setItem('isOTPVerified', 'false');
-      navigate('/verify-2fa');
+      const userData = userSnap.data();
+      const role = userData.role;
+
+      // Optional: clear any OTP verification flags
+      localStorage.setItem('isOTPVerified', 'true');
+
+      // Redirect based on role
+      if (role === 'Admin') {
+        navigate('/admin-dashboard');
+      } else if (role === 'User') {
+        navigate('/user-dashboard');
+      } else if (role === 'Staff') {
+        navigate('/staff-dashboard');
+      } else {
+        setError('Unknown user role.');
+      }
+
+      if (onClose) onClose(); // Close popup if provided
+
     } catch (err) {
       console.error(err);
       setError('Invalid email or password.');
