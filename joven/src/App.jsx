@@ -7,14 +7,12 @@ import {
   Outlet,
   useNavigate,
 } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
-import { signOut } from 'firebase/auth';
 
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
-import Verify from './pages/Verify';
 
 import AdminDashboard from './pages/admin-page/AdminDashboard';
 import AdminSales from './pages/admin-page/Sales';
@@ -60,21 +58,13 @@ const ProtectedRoute = ({ role, children }) => {
         }
 
         const userData = userSnap.data();
-        const isOTPVerified = localStorage.getItem('isOTPVerified') === 'true';
         const userRole = userData.role;
 
-        if (!isOTPVerified) {
-          if (window.location.pathname !== '/verify-2fa') {
-            navigate('/verify-2fa');
-          }
-          setAccessGranted(false);
+        if (userRole === role) {
+          setAccessGranted(true);
         } else {
-          if (userRole === role) {
-            setAccessGranted(true);
-          } else {
-            navigate('/');
-            setAccessGranted(false);
-          }
+          navigate('/');
+          setAccessGranted(false);
         }
       } catch (err) {
         console.error('ProtectedRoute error:', err);
@@ -99,14 +89,16 @@ const AdminLayout = () => (
 );
 
 function App() {
-useEffect(() => {
-  signOut(auth);
-  localStorage.clear(); // Clear any stored OTP/session data
-}, []);
+  useEffect(() => {
+    // Optional logout on refresh for testing/dev
+    signOut(auth);
+    localStorage.clear();
+  }, []);
 
   return (
     <Router>
       <Routes>
+        {/* Public Routes */}
         <Route
           path="/"
           element={
@@ -131,9 +123,8 @@ useEffect(() => {
             </RedirectIfAuthenticated>
           }
         />
-        <Route path="/verify-2fa" element={<Verify />} />
 
-        {/* Admin Routes */}
+        {/* Admin Protected Routes */}
         <Route
           path="/admin-dashboard"
           element={
@@ -152,7 +143,7 @@ useEffect(() => {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* User Route */}
+        {/* User Protected Route */}
         <Route
           path="/user-dashboard"
           element={
@@ -162,7 +153,7 @@ useEffect(() => {
           }
         />
 
-        {/* Staff Route */}
+        {/* Staff Protected Route */}
         <Route
           path="/staff-dashboard"
           element={

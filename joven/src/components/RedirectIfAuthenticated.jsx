@@ -1,3 +1,5 @@
+// src/components/RedirectIfAuthenticated.jsx
+
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -19,16 +21,11 @@ const RedirectIfAuthenticated = ({ children }) => {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const data = userDoc.data();
-          const { role, isOTPVerified } = data;
+          const { role } = data;
 
-          if (isOTPVerified) {
-            if (role === 'Admin') setRedirectPath('/admin-dashboard');
-            else if (role === 'User') setRedirectPath('/user-dashboard');
-            else if (role === 'Staff') setRedirectPath('/staff-dashboard');
-          } else {
-            // Not verified, send to verify
-            setRedirectPath('/verify-2fa');
-          }
+          if (role === 'Admin') setRedirectPath('/admin-dashboard');
+          else if (role === 'User') setRedirectPath('/user-dashboard');
+          else if (role === 'Staff') setRedirectPath('/staff-dashboard');
         }
       } catch (err) {
         console.error('Failed to fetch role during redirect:', err);

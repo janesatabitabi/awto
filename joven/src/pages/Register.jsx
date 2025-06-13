@@ -168,12 +168,13 @@ const Register = () => {
           />
 
           <button
-            className="login-button"
+            className="register-button"
             type="submit"
-            style={{ marginTop: '1.5rem', width: '100%' }}
+            style={{ marginTop: '1.5rem' }}
           >
             Register
           </button>
+
         </form>
       </div>
     </>
