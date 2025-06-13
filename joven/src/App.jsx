@@ -12,6 +12,7 @@ import Register from './pages/Register';
 import AdminDashboard from './pages/admin-page/AdminDashboard';
 import AdminSales from './pages/admin-page/Sales';
 import AdminInventory from './pages/admin-page/Inventory';
+import AdminProducts from './pages/admin-page/Products';
 import AdminStaffs from './pages/admin-page/Staffs';
 import AdminReservations from './pages/admin-page/Reservations';
 import AdminCustomers from './pages/admin-page/Customers';
@@ -71,6 +72,7 @@ function App() {
           <Route index element={<AdminSales />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="inventory" element={<AdminInventory />} />
+          <Route path="products" element={<AdminProducts />} />
           <Route path="staffs" element={<AdminStaffs />} />
           <Route path="reservations" element={<AdminReservations />} />
           <Route path="customers" element={<AdminCustomers />} />
