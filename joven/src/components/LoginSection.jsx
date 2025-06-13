@@ -1,87 +1,93 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-const LoginSection = () => {
+const LoginSection = ({ onClose }) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
+
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
-      if (userDoc.exists()) {
-        const role = userDoc.data().role;
+      const userRef = doc(db, 'users', user.uid);
+      const userSnap = await getDoc(userRef);
 
-        if (role === 'Admin') {
-          navigate('/admin-dashboard');
-        } else if (role === 'User') {
-          navigate('/user-dashboard');
-        } else if (role === 'Staff') {
-          navigate('/staff-dashboard');
-        } else {
-          alert('Unauthorized role.');
-        }
-      } else {
-        alert('No user data found in Firestore.');
+      if (!userSnap.exists()) {
+        setError('User data not found.');
+        return;
       }
 
-    } catch (error) {
-      console.error('Login error:', error.message);
-      alert('Login failed: ' + error.message);
+      localStorage.setItem('isOTPVerified', 'false');
+      navigate('/verify-2fa');
+    } catch (err) {
+      console.error(err);
+      setError('Invalid email or password.');
     }
   };
 
   return (
-    <form className="login-form" onSubmit={handleLogin}>
-      <h2>Login</h2>
-      
-      <label htmlFor="email" className="form-label">Email</label>
-      <input
-        type="email"
-        id="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="form-input"
-        placeholder="Enter email"
-        required
-      />
-      
-      <label htmlFor="password" className="form-label">Password</label>
-      <div className="password-wrapper">
-        <input
-          type={showPassword ? 'text' : 'password'}
-          id="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="form-input"
-          placeholder="Enter password"
-          required
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="toggle-password"
-          aria-label="Toggle password visibility"
-        >
-          {showPassword ? <FiEyeOff /> : <FiEye />}
-        </button>
+    <div className="login-popup-overlay">
+      <div className="login-form">
+        <button className="close-popup" onClick={onClose}>&times;</button>
+        <h2 className="text-xl font-bold mb-4">Sign in to your account</h2>
+
+        {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
+
+        <form onSubmit={handleLogin}>
+          <label className="form-label">Email</label>
+          <input
+            type="email"
+            className="form-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+          />
+
+          <label className="form-label">Password</label>
+          <div className="password-wrapper">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              className="form-input"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              required
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
+          </div>
+
+          <button type="submit" className="explore-button" style={{ marginTop: '1.5rem' }}>
+            Login
+          </button>
+        </form>
+
+        <p className="create-account-text">
+          Don’t have an account?{' '}
+          <Link className="link" to="/register" onClick={onClose}>
+            Create one
+          </Link>
+        </p>
       </div>
-
-      <button type="submit" className="login-button">Login</button>
-
-      <p className="create-account-text" onClick={() => navigate('/register')}>
-        Don’t have an account? <span className="link">Create an account</span>
-      </p>
-    </form>
+    </div>
   );
 };
 

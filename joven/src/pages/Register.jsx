@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import Navbar from '../components/Navbar'; // ✅ Import the Navbar
+import Navbar from '../components/Navbar';
 import '../styles/LandingPage.css';
 
 const Register = () => {
@@ -60,11 +60,7 @@ const Register = () => {
     if (!validateForm()) return;
 
     try {
-      const { user } = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+      const { user } = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
 
       await setDoc(doc(db, 'users', user.uid), {
         name: formData.name,
@@ -73,10 +69,18 @@ const Register = () => {
         gender: formData.gender,
         birthday: formData.birthday,
         role: 'User',
+        createdAt: new Date(),
       });
 
-      alert('Account created successfully!');
-      navigate('/user-dashboard');
+      // Initialize 2FA settings (optional default: disabled)
+      await setDoc(doc(db, '2fa', user.uid), {
+        enabled: false,
+        lastOTP: null,
+        expiresAt: null,
+      });
+
+      alert('Account created successfully! Please login.');
+      navigate('/login');
     } catch (error) {
       console.error('Registration error:', error);
       alert(error.message);
@@ -95,10 +99,10 @@ const Register = () => {
             className="form-input"
             type="text"
             name="name"
-            required
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your full name"
+            required
           />
 
           <label className="form-label" htmlFor="email">Email:</label>
@@ -107,10 +111,10 @@ const Register = () => {
             className="form-input"
             type="email"
             name="email"
-            required
             value={formData.email}
             onChange={handleChange}
             placeholder="Enter your email"
+            required
           />
 
           <label className="form-label" htmlFor="password">Password:</label>
@@ -119,10 +123,10 @@ const Register = () => {
             className="form-input"
             type="password"
             name="password"
-            required
             value={formData.password}
             onChange={handleChange}
             placeholder="Create a password"
+            required
           />
 
           <label className="form-label" htmlFor="address">Address:</label>
@@ -131,10 +135,10 @@ const Register = () => {
             className="form-input"
             type="text"
             name="address"
-            required
             value={formData.address}
             onChange={handleChange}
             placeholder="Enter your address"
+            required
           />
 
           <label className="form-label" htmlFor="gender">Gender:</label>
@@ -142,9 +146,9 @@ const Register = () => {
             id="gender"
             className="form-input"
             name="gender"
-            required
             value={formData.gender}
             onChange={handleChange}
+            required
           >
             <option value="">Select Gender</option>
             <option value="Male">Male</option>
@@ -158,18 +162,19 @@ const Register = () => {
             className="form-input"
             type="date"
             name="birthday"
-            required
             value={formData.birthday}
             onChange={handleChange}
+            required
           />
 
           <button
-            className="login-button"
+            className="register-button"
             type="submit"
-            style={{ marginTop: '1.5rem', width: '100%' }}
+            style={{ marginTop: '1.5rem' }}
           >
             Register
           </button>
+
         </form>
       </div>
     </>

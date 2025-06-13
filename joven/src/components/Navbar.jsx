@@ -1,11 +1,12 @@
-// Navbar.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import jovenLogo from '../assets/jovenlogo.png';
 import '../styles/LandingPage.css';
+import LoginSection from './LoginSection';
 
 const Navbar = ({ hideCreateAccount, showLogout, handleLogout }) => {
   const navigate = useNavigate();
+  const [showLogin, setShowLogin] = useState(false);
 
   return (
     <nav className="navbar">
@@ -18,18 +19,9 @@ const Navbar = ({ hideCreateAccount, showLogout, handleLogout }) => {
         <a href="#Brand" className="nav-link">Brand</a>
         <a href="#about" className="nav-link">About</a>
         <a href="#services" className="nav-link">Services</a>
-
-        {!hideCreateAccount && (
-          <button className='create-account-button' onClick={() => navigate('/register')}>
-            Create an account
-          </button>
-        )}
-
-        {showLogout && (
-          <button className='logout-button' onClick={handleLogout}>
-            Logout
-          </button>
-        )}
+        <button className='create-account-button' onClick={() => navigate('/register')}>
+          Create an account
+        </button>
       </div>
     </nav>
   );
