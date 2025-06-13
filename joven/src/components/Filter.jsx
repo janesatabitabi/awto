@@ -1,66 +1,184 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../styles/UserDashboard.css";
-import "../styles/Filter.css"; // Update path based on your folder structure
+import "../styles/Filter.css";
 
+const WHEEL_TIRE_FILTERS = [
+  {
+    name: "Brand",
+    options: ["American Racing", "BBS", "Enkei", "Konig", "Rays", "Volk"],
+    multiSelect: true,
+  },
+  {
+    name: "Diameter",
+    options: ['14"', '15"', '16"', '17"', '18"', '19"', '20"', '22"'],
+    multiSelect: true,
+  },
+  {
+    name: "Width",
+    options: ['6"', '7"', '8"', '9"', '10"', '12"'],
+    multiSelect: true,
+  },
+  {
+    name: "Bolt Pattern",
+    options: ["4x100", "5x114.3", "5x120", "6x139.7"],
+    multiSelect: true,
+  },
+  {
+    name: "Offset",
+    options: ["+20", "+25", "+30", "+35", "+40"],
+    multiSelect: true,
+  },
+  {
+    name: "Lug Count",
+    options: ["4", "5", "6"],
+    multiSelect: true,
+  },
+  {
+    name: "Material",
+    options: [
+      "Cast Aluminum",
+      "Flow Formed Aluminum",
+      "Forged Aluminum",
+      "Steel",
+    ],
+    multiSelect: true,
+  },
+  {
+    name: "Finish",
+    options: ["Gloss Black", "Matte Black", "Chrome", "Silver", "Gunmetal"],
+    multiSelect: true,
+  },
+  {
+    name: "New",
+    options: ["Yes"],
+    multiSelect: false,
+  },
+  {
+    name: "Price Range",
+    options: ["$0 - $100", "$100 - $200", "$200 - $300", "$300+"],
+    multiSelect: false,
+  },
+];
 
-const Filter = () => {
+const Filter = ({ onChange }) => {
   const [expanded, setExpanded] = useState([]);
-  const [activeFilters, setActiveFilters] = useState({ Brand: "Example" });
+  const [selectedFilters, setSelectedFilters] = useState({});
 
-  const filters = [
-    "Brand", "New", "Finish", "Diameter", "Width",
-    "Bolt Pattern", "Offset", "Size", "Lug Count", "Material", "Price"
-  ];
+  useEffect(() => {
+    const filtersToSend = Object.fromEntries(
+      Object.entries(selectedFilters).map(([key, set]) => [
+        key,
+        Array.from(set),
+      ])
+    );
+    onChange && onChange(filtersToSend);
+  }, [selectedFilters, onChange]);
 
-  const toggle = (index) => {
-    setExpanded(prev =>
-      prev.includes(index)
-        ? prev.filter(i => i !== index)
-        : [...prev, index]
+  const toggleExpand = (filterName) => {
+    setExpanded((prev) =>
+      prev.includes(filterName)
+        ? prev.filter((name) => name !== filterName)
+        : [...prev, filterName]
     );
   };
 
-  const clearFilters = () => {
-    setActiveFilters({});
+  const toggleOption = (filterName, option, multiSelect) => {
+    setSelectedFilters((prev) => {
+      const currentSet = new Set(prev[filterName] || []);
+      if (currentSet.has(option)) {
+        currentSet.delete(option);
+      } else {
+        if (!multiSelect) {
+          return { ...prev, [filterName]: new Set([option]) };
+        }
+        currentSet.add(option);
+      }
+      return { ...prev, [filterName]: currentSet };
+    });
   };
 
-  const handleSelectOption = (filterName, optionValue) => {
-    setActiveFilters(prev => ({ ...prev, [filterName]: optionValue }));
+  const clearFilter = (filterName) => {
+    setSelectedFilters((prev) => {
+      const copy = { ...prev };
+      delete copy[filterName];
+      return copy;
+    });
+  };
+
+  const clearAll = () => {
+    setSelectedFilters({});
   };
 
   return (
     <div className="filters">
       <div className="filters-header">
-        <h3>Active Filters ({Object.keys(activeFilters).length})</h3>
-        {Object.keys(activeFilters).length > 0 && (
-          <button onClick={clearFilters} className="clear-btn">Clear All</button>
+        <h3>Active Filters ({Object.keys(selectedFilters).length})</h3>
+        {Object.keys(selectedFilters).length > 0 && (
+          <button onClick={clearAll} className="clear-btn">
+            Clear All
+          </button>
         )}
       </div>
 
-      {filters.map((filter, idx) => (
-        <div key={idx}>
-          <div className="filter-header" onClick={() => toggle(idx)}>
-            {filter} <span>{expanded.includes(idx) ? "-" : "+"}</span>
-          </div>
+      {WHEEL_TIRE_FILTERS.map(({ name, options, multiSelect }) => {
+        const isExpanded = expanded.includes(name);
+        const selectedSet = selectedFilters[name] || new Set();
 
-          {expanded.includes(idx) && (
-            <div className="filter-content">
-              <div
-                className="filter-option"
-                onClick={() => handleSelectOption(filter, `${filter} Option 1`)}
+        return (
+          <div key={name}>
+            <div
+              className="filter-header"
+              onClick={() => toggleExpand(name)}
+              tabIndex={0}
+              role="button"
+              aria-expanded={isExpanded}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") toggleExpand(name);
+              }}
+            >
+              <span>{name}</span>
+              <button
+                className="clear-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  clearFilter(name);
+                }}
+                aria-label={`Clear filter ${name}`}
+                disabled={selectedSet.size === 0}
+                type="button"
               >
-                {filter} Option 1
-              </div>
-              <div
-                className="filter-option"
-                onClick={() => handleSelectOption(filter, `${filter} Option 2`)}
-              >
-                {filter} Option 2
-              </div>
+                &times;
+              </button>
+              <span>{isExpanded ? "-" : "+"}</span>
             </div>
-          )}
-        </div>
-      ))}
+
+            {isExpanded && (
+              <div className="filter-content" role="group" aria-label={`${name} filter options`}>
+                {options.map((option) => {
+                  const selected = selectedSet.has(option);
+                  return (
+                    <div
+                      key={option}
+                      className={`filter-option ${selected ? "selected" : ""}`}
+                      onClick={() => toggleOption(name, option, multiSelect)}
+                      tabIndex={0}
+                      role="checkbox"
+                      aria-checked={selected}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          toggleOption(name, option, multiSelect);
+                        }
+                      }}
+                    >
+                      {option}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
