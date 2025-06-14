@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaBars } from 'react-icons/fa';
 import jovenLogo from '../assets/jovenlogo.png';
 import '../styles/LandingPage.css';
 import LoginSection from './LoginSection';
@@ -7,6 +8,7 @@ import LoginSection from './LoginSection';
 const Navbar = () => {
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false); // for mobile menu
 
   return (
     <>
@@ -16,15 +18,22 @@ const Navbar = () => {
           <span className="brand-name">Joven Tire Enterprise</span>
         </div>
 
-        <div className="right-nav">
-          <a href="#fitment" className="nav-link">Fitment</a>
-          <a href="#brand" className="nav-link">Brand</a>
-          <a href="#services" className="nav-link">Services</a>
-          <a href="#about" className="nav-link">About</a>
+        <button className="menu-toggle" onClick={() => setMenuOpen(!menuOpen)}>
+          <FaBars />
+        </button>
+
+        <div className={`right-nav ${menuOpen ? 'open' : ''}`}>
+          <a href="#fitment" className="nav-link" onClick={() => setMenuOpen(false)}>Fitment</a>
+          <a href="#brand" className="nav-link" onClick={() => setMenuOpen(false)}>Brand</a>
+          <a href="#services" className="nav-link" onClick={() => setMenuOpen(false)}>Services</a>
+          <a href="#about" className="nav-link" onClick={() => setMenuOpen(false)}>About</a>
 
           <button className="icon-button" title="Notifications">🔔</button>
           <button className="icon-button" title="My Selections">🛒 My Selections</button>
-          <button className="create-account-button" onClick={() => setShowLogin(true)}>
+          <button className="create-account-button" onClick={() => {
+            setShowLogin(true);
+            setMenuOpen(false);
+          }}>
             Account
           </button>
         </div>

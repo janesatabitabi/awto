@@ -1,0 +1,139 @@
+.footer {
+  background-color: #0a0a0a;
+  color: #f1f1f1;
+  padding: 3rem 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  border-top: 5px solid #e2b007; /* Optional: a golden accent bar */
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  border-bottom: 1px solid #333;
+  padding-bottom: 2rem;
+  gap: 2rem;
+}
+
+.newsletter {
+  flex: 1;
+  min-width: 250px;
+}
+
+.newsletter h4 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.newsletter p {
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.newsletter input {
+  padding: 0.6rem 0.8rem;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 320px;
+  border: none;
+  border-radius: 4px;
+  background-color: #1e1e1e;
+  color: #fff;
+}
+
+.newsletter input::placeholder {
+  color: #bbb;
+}
+
+.social-icons {
+  margin-top: 1rem;
+}
+
+.social-icons a {
+  color: #f1f1f1;
+  margin-right: 1rem;
+  font-size: 1.3rem;
+  transition: color 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #e2b007; /* Highlight color on hover */
+}
+
+.footer-links {
+  display: flex;
+  flex: 2;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  min-width: 300px;
+}
+
+.footer-links div {
+  min-width: 140px;
+  margin-top: 1rem;
+}
+
+.footer-links h5 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #fff;
+}
+
+.footer-links ul {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links ul li {
+  margin: 0.4rem 0;
+}
+
+.footer-links ul li a {
+  color: #ccc;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-links ul li a:hover {
+  color: #e2b007;
+}
+
+.footer-bottom {
+  text-align: center;
+  margin-top: 2.5rem;
+  font-size: 0.85rem;
+  border-top: 1px solid #333;
+  padding-top: 1.2rem;
+  color: #aaa;
+}
+
+.footer-policies {
+  margin-top: 0.5rem;
+}
+
+.footer-policies a {
+  color: #aaa;
+  margin: 0 0.6rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-policies a:hover {
+  color: #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .footer-top {
+    flex-direction: column;
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .footer-links div {
+    margin-top: 0;
+  }
+}

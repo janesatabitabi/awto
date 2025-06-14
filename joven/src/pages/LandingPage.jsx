@@ -1,6 +1,7 @@
 import React from 'react';
 import '../styles/LandingPage.css';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer'; // ✅ Import Footer
 
 const LandingPage = () => {
   return (
@@ -67,6 +68,8 @@ const LandingPage = () => {
         </section>
 
       </main>
+
+      <Footer /> {/* ✅ Add Footer here */}
     </>
   );
 };

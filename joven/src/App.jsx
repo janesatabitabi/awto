@@ -11,9 +11,12 @@ import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
+// Public pages
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
+import ViewProduct from "./components/ViewProduct"; // ✅ NEW COMPONENT
 
+// Admin pages
 import AdminDashboard from './pages/admin-page/AdminDashboard';
 import AdminSales from './pages/admin-page/Sales';
 import AdminInventory from './pages/admin-page/Inventory';
@@ -23,9 +26,11 @@ import AdminReservations from './pages/admin-page/Reservations';
 import AdminCustomers from './pages/admin-page/Customers';
 import AdminSettings from './pages/admin-page/Settings';
 
+// User and Staff dashboards
 import UserDashboard from './pages/user-page/UserDashboard';
 import StaffDashboard from './pages/staff-page/StaffDashboard';
 
+// Auth guard
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 
 const Spinner = () => (
@@ -99,36 +104,26 @@ function App() {
     <Router>
       <Routes>
         {/* Public Routes */}
-        <Route
-          path="/"
-          element={
-              <LandingPage />        
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <RedirectIfAuthenticated>
-              <LandingPage />
-            </RedirectIfAuthenticated>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <RedirectIfAuthenticated>
-              <Register />
-            </RedirectIfAuthenticated>
-          }
-        />
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={
+          <RedirectIfAuthenticated>
+            <LandingPage />
+          </RedirectIfAuthenticated>
+        } />
+        <Route path="/register" element={
+          <RedirectIfAuthenticated>
+            <Register />
+          </RedirectIfAuthenticated>
+        } />
+        <Route path="/view-product/:id" element={<ViewProduct />} /> {/* ✅ NEW ROUTE */}
 
         {/* Admin Protected Routes */}
         <Route
           path="/admin-dashboard"
           element={
-            /* <ProtectedRoute role="Admin"> */
+            // <ProtectedRoute role="Admin"> 
               <AdminLayout />
-            /* </ProtectedRoute> */
+            // </ProtectedRoute>
           }
         >
           <Route index element={<AdminSales />} />

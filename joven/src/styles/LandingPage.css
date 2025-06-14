@@ -1,9 +1,12 @@
 /* Global Styles */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  scroll-behavior: smooth;
 }
 
 /* Navigation Bar */
@@ -152,7 +155,6 @@ body {
   cursor: pointer;
   z-index: 10;
 }
-
 
 /* Input Labels */
 .form-label {
@@ -366,4 +368,45 @@ body {
 .register-button:active {
   background-color: #1e40af; /* Tailwind blue-800 */
   transform: translateY(0);
+}
+
+/* Hamburger Button */
+.menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.8rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Show in Mobile */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+    margin-left: auto;
+  }
+
+  .right-nav {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    display: none;
+  }
+
+  .right-nav.open {
+    display: flex;
+    margin-top: 1rem;
+  }
+
+  .nav-link,
+  .icon-button,
+  .create-account-button {
+    width: 100%;
+    text-align: left;
+  }
+
+  .create-account-button {
+    margin-top: 0.5rem;
+  }
 }
