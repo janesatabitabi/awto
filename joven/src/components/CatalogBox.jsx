@@ -1,16 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase"; // adjust path if needed
 import "../styles/CatalogBox.css";
 
 const CatalogBox = () => {
   const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
 
-  const products = [
-    { id: 1, name: "AMERICAN RACING GT STREET", brand: "Flow Formed Aluminum", image: "/img1.jpg", price: 220 },
-    { id: 2, name: "AMERICAN RACING G-FORCE", brand: "Flow Formed Aluminum", image: "/img2.jpg", price: 220 },
-    { id: 3, name: "AMERICAN RACING 500 MONO CAST", brand: "Cast Aluminum", image: "/img3.jpg", price: 210 },
-    { id: 4, name: "AMERICAN RACING AR23", brand: "Cast Aluminum", image: "/img4.jpg", price: 205 }
-  ];
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+      const fetched = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setProducts(fetched);
+    });
+
+    return () => unsubscribe(); // Cleanup listener
+  }, []);
 
   const handleView = (id) => {
     navigate(`/view-product/${id}`);
@@ -26,17 +34,26 @@ const CatalogBox = () => {
           <option value="featured">Sort By: Featured</option>
         </select>
       </div>
+
       <div className="product-grid">
-        {products.map((product) => (
-          <div key={product.id} className="product-card" onClick={() => handleView(product.id)}>
-            <div className="tag">NEW</div>
-            <img src={product.image} alt={product.name} className="product-img" />
-            <h4 className="product-name">{product.name}</h4>
-            <p className="product-brand">{product.brand}</p>
-            <p className="product-price">${product.price}</p>
-            <div className="product-rating">★★★★☆ 1 Review</div>
-          </div>
-        ))}
+        {products.length === 0 ? (
+          <p>No products available.</p>
+        ) : (
+          products.map((product) => (
+            <div key={product.id} className="product-card" onClick={() => handleView(product.id)}>
+              <div className="tag">NEW</div>
+              <img
+                src={product.image || "https://placehold.co/150x150?text=No+Image"}
+                alt={product.name}
+                className="product-img"
+              />
+              <h4 className="product-name">{product.name}</h4>
+              <p className="product-brand">{product.category || "—"}</p>
+              <p className="product-price">${product.price}</p>
+              <div className="product-rating">★★★★☆ 1 Review</div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
