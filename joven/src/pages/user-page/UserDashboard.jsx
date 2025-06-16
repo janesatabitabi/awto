@@ -2,24 +2,40 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
-import Navbar from '../../components/Navbar'; // ✅ corrected path
-import "../../styles/UserDashboard.css";
+import Navbar from '../../components/Navbar';
+import Filter from '../../components/Filter';
+import CatalogBox from '../../components/CatalogBox';
+
+import '../../styles/UserDashboard.css';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut(auth);
-    navigate('/');
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
     <>
-      <Navbar />
-      <div style={{ padding: '2rem' }}>
-        <h1>User Dashboard</h1>
-        <p>Welcome, valued customer! Here’s your dashboard.</p>
-        <button onClick={handleLogout} style={{ marginTop: '1rem' }}>Logout</button>
+      <Navbar hideCreateAccount={true} showLogout={true} handleLogout={handleLogout} />
+
+      <div className="user-dashboard-container">
+        <h1>Welcome to Joven Tired napo kami huhu Shop</h1>
+        <p>Select your vehicle and browse fitment-matching products.</p>
+
+        <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
+          <div style={{ flex: 1 }}>
+            <Filter />
+          </div>
+          <div style={{ flex: 3 }}>
+            <CatalogBox />
+          </div>
+        </div>
       </div>
     </>
   );

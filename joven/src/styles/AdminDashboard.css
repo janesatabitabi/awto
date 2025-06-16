@@ -248,3 +248,44 @@ html, body, #root {
     box-shadow: none; /* Remove shadow on mobile */
   }
 }
+
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100vh;
+  padding: 1rem;
+  background-color: #1e272e;
+  color: white;
+  width: 250px;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.admin-logout-container {
+  padding-top: 1rem;
+}
+
+.admin-logout-button {
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.3s ease;
+}
+
+.admin-logout-button:hover {
+  background-color: #c0392b;
+}
+
+.admin-main-content {
+  margin-left: 250px;
+  padding: 2rem;
+  width: calc(100% - 250px);
+}

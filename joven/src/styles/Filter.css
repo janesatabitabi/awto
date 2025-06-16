@@ -1,0 +1,180 @@
+.filters {
+  width: 100%;
+  max-width: 280px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  user-select: none;
+}
+
+/* Responsive: full width on small screens */
+@media (max-width: 768px) {
+  .filters {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filters-header h3 {
+  font-size: 1rem;
+  color: #333;
+  margin: 0;
+  font-weight: 600;
+}
+
+.clear-btn {
+  background: none;
+  border: none;
+  color: #007bff;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.clear-btn:hover:not(:disabled),
+.clear-btn:focus {
+  color: #0056b3;
+  background-color: #e2e6f0;
+  outline: none;
+}
+
+.clear-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.filter-header {
+  font-weight: 700;
+  color: #444;
+  padding: 10px 8px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  align-items: center;
+  font-size: 1rem;
+  position: relative;
+}
+
+.filter-header:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.filter-header span:last-child {
+  font-size: 1.4rem;
+  user-select: none;
+  margin-left: 10px;
+  font-weight: 700;
+  line-height: 0;
+}
+
+.filter-header button.clear-btn {
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 6px;
+  background: transparent;
+  color: #888;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  user-select: none;
+}
+
+.filter-header button.clear-btn:hover,
+.filter-header button.clear-btn:focus {
+  color: #007bff;
+  outline: none;
+}
+
+.filter-content {
+  padding: 10px 8px 12px 8px;
+  background-color: #f8f8f8;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  max-height: 240px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc transparent;
+}
+
+.filter-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filter-content::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 3px;
+}
+
+.filter-option {
+  margin-bottom: 6px;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  user-select: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.filter-option:hover,
+.filter-option:focus {
+  background-color: #e9f0fe;
+  border-color: #007bff;
+  outline: none;
+  color: #007bff;
+}
+
+.filter-option.selected {
+  background-color: #007bff;
+  color: #fff;
+  border-color: #0056b3;
+}
+
+.filter-option.selected:hover,
+.filter-option.selected:focus {
+  background-color: #0056b3;
+  border-color: #003f7f;
+  color: #fff;
+}
+
+/* Keyboard focus styles for divs marked as filter-option */
+.filter-option:focus-visible {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling for filter content */
+.filter-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* For better touch targets and spacing on mobile */
+@media (max-width: 480px) {
+  .filter-option {
+    padding: 12px 14px;
+    font-size: 1rem;
+  }
+  .filter-header {
+    padding: 14px 10px;
+    font-size: 1.1rem;
+  }
+}
+
