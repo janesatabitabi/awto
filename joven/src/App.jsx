@@ -108,13 +108,14 @@ function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
 
-        {/* Admin Protected Routes */}
-        <Route
+       <Route
           path="/admin-dashboard"
           element={
-            // <ProtectedRoute role="Admin"> 
-              <AdminLayout />
-            // </ProtectedRoute>
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="Admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
           }
         >
           <Route index element={<AdminSales />} />
