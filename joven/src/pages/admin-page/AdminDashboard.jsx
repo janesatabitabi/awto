@@ -28,6 +28,7 @@ const AdminDashboard = () => {
     { path: 'reservations', label: 'Reservations' },
     { path: 'settings', label: 'Settings' },
   ];
+  
 
   return (
     <div className="admin-dashboard">
