@@ -1,4 +1,4 @@
-/* Global Styles */
+/* ================= GLOBAL ================= */
 html {
   scroll-behavior: smooth;
 }
@@ -7,9 +7,11 @@ body {
   margin: 0;
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f6fa;
+  color: #2d3436;
 }
 
-/* Navigation Bar */
+/* ================= NAVBAR ================= */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -39,13 +41,13 @@ body {
 .brand-name {
   font-weight: 700;
   font-size: 1.3rem;
-  color: white;
+  color: #fff;
 }
 
 .right-nav {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.25rem;
 }
 
 .nav-link {
@@ -56,20 +58,22 @@ body {
   transition: color 0.3s ease;
 }
 
-.nav-link:hover {
+.nav-link:hover,
+.nav-link:focus {
   color: #ffffff;
 }
 
 .icon-button {
   background: none;
   border: none;
-  font-size: 1.1rem;
-  color: #ffffff;
+  font-size: 1.3rem;
+  color: #fff;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
-.icon-button:hover {
+.icon-button:hover,
+.icon-button:focus {
   transform: scale(1.1);
 }
 
@@ -77,8 +81,8 @@ body {
   background-color: #f39c12;
   color: #fff;
   border: none;
-  padding: 0.5rem 1.1rem;
-  border-radius: 5px;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 700;
   font-size: 1rem;
@@ -89,7 +93,7 @@ body {
   background-color: #e67e22;
 }
 
-/* Section Styling */
+/* ================= SECTIONS ================= */
 .section {
   padding: 5rem 2rem;
   min-height: 100vh;
@@ -103,82 +107,77 @@ body {
 .services-section,
 .about-section {
   background-color: #ffffff;
-  color: #2d3436;
 }
 
 .section h2 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .section p {
   font-size: 1.1rem;
   max-width: 800px;
-  margin: auto;
+  margin: 0 auto;
   text-align: center;
 }
 
-/* Popup Overlay */
+/* ================= POPUP FORM ================= */
 .login-popup-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.4);
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
-/* Popup Form Container */
 .login-form {
   background-color: #fff;
-  padding: 3rem 2.5rem;
+  padding: 2.5rem 2rem;
   border-radius: 15px;
-  width: 100%;
   max-width: 420px;
-  text-align: center;
+  width: 100%;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  text-align: center;
   position: relative;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .close-popup {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  background: transparent;
+  background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  z-index: 10;
+  color: #555;
 }
 
-/* Input Labels */
+/* ================= FORM INPUTS ================= */
 .form-label {
-  margin-bottom: 0.3rem;
+  display: block;
+  margin: 1rem 0 0.3rem;
   font-weight: 600;
   font-size: 1rem;
-  color: #333;
-  margin-top: 1rem;
-  display: block;
   text-align: left;
 }
 
-/* Input Fields */
 .form-input {
+  width: 100%;
   padding: 0.6rem 0.8rem;
   font-size: 1rem;
   border-radius: 6px;
-  border: 1.8px solid #ccc;
+  border: 2px solid #ccc;
   outline: none;
-  width: 100%;
   transition: border 0.3s ease;
 }
 
-/* Password Toggle Wrapper */
+.form-input:focus {
+  border-color: #057dcd;
+}
+
 .password-wrapper {
   position: relative;
   display: flex;
@@ -186,7 +185,6 @@ body {
 }
 
 .password-wrapper .form-input {
-  flex: 1;
   padding-right: 40px;
 }
 
@@ -200,11 +198,10 @@ body {
   font-size: 1.2rem;
 }
 
-/* Login Button */
 .explore-button {
   margin-top: 1.5rem;
   background-color: #057dcd;
-  color: white;
+  color: #fff;
   border: none;
   padding: 0.7rem 1.5rem;
   border-radius: 8px;
@@ -218,12 +215,9 @@ body {
   background-color: #056bb3;
 }
 
-/* Create Account Link */
 .create-account-text {
   margin-top: 1rem;
   font-size: 0.95rem;
-  color: #333;
-  cursor: default;
 }
 
 .create-account-text .link {
@@ -233,15 +227,15 @@ body {
   cursor: pointer;
 }
 
-/* Fitment Section */
+/* ================= FITMENT SECTION ================= */
 .fitment-section {
-  background-image: url('../assets/tires-bg.jpg'); /* Replace if needed */
+  background-image: url('../assets/tires-bg.jpg');
   background-size: cover;
   background-position: center;
   color: white;
+  padding: 6rem 2rem;
   text-align: center;
   position: relative;
-  padding: 6rem 2rem;
 }
 
 .fitment-overlay {
@@ -253,22 +247,16 @@ body {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
 }
 
-.fitment-heading {
-  margin-bottom: 2.5rem;
-}
-
 .fitment-subtitle {
   font-size: 1.3rem;
   font-weight: bold;
   color: #adff2f;
-  letter-spacing: 1px;
 }
 
 .fitment-title {
   font-size: 3rem;
   font-weight: 800;
   font-style: italic;
-  margin-top: 0.3rem;
   text-shadow: 2px 2px #000;
 }
 
@@ -311,44 +299,9 @@ body {
   background-color: #caff5f;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .navbar {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .right-nav {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-  }
-
-  .section h2 {
-    font-size: 1.8rem;
-  }
-
-  .explore-button {
-    font-size: 1rem;
-    padding: 0.5rem 1.2rem;
-  }
-
-  .fitment-title {
-    font-size: 2.3rem;
-  }
-
-  .fitment-form {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .fitment-select,
-  .fitment-button {
-    width: 100%;
-  }
-}
-
+/* ================= REGISTER BUTTON ================= */
 .register-button {
-  background-color: #1d4ed8; /* Tailwind blue-700 */
+  background-color: #1d4ed8;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
@@ -356,21 +309,21 @@ body {
   font-weight: 600;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
   width: 100%;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 .register-button:hover {
-  background-color: #2563eb; /* Tailwind blue-600 */
+  background-color: #2563eb;
   transform: translateY(-2px);
 }
 
 .register-button:active {
-  background-color: #1e40af; /* Tailwind blue-800 */
+  background-color: #1e40af;
   transform: translateY(0);
 }
 
-/* Hamburger Button */
+/* ================= MOBILE NAV ================= */
 .menu-toggle {
   display: none;
   background: none;
@@ -380,8 +333,12 @@ body {
   cursor: pointer;
 }
 
-/* Show in Mobile */
 @media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
   .menu-toggle {
     display: block;
     margin-left: auto;
@@ -409,4 +366,95 @@ body {
   .create-account-button {
     margin-top: 0.5rem;
   }
+
+  .section h2 {
+    font-size: 1.8rem;
+  }
+
+  .explore-button {
+    font-size: 1rem;
+    padding: 0.5rem 1.2rem;
+  }
+
+  .fitment-title {
+    font-size: 2.3rem;
+  }
+
+  .fitment-form {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fitment-select,
+  .fitment-button {
+    width: 100%;
+  }
+}
+
+/* ================= OPTIONAL LOGIN PAGE STYLES ================= */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 1rem;
+}
+
+.login-box {
+  width: 100%;
+  max-width: 420px;
+  background-color: #fff;
+  padding: 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.login-form-content input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input .toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
+.google-btn {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #4285f4;
+  color: #fff;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  margin-top: 1rem;
+  cursor: pointer;
+}
+
+.separator {
+  margin: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.separator span {
+  padding: 0 1rem;
+  color: #888;
+}
+
+.login-note {
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  color: #666;
 }

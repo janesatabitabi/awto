@@ -1,7 +1,6 @@
-  // src/components/ProtectedRoute.jsx
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { auth, db } from '../firebase'; // your firebase config
+import { auth, db } from '../firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
@@ -11,7 +10,7 @@ const ProtectedRoute = ({ allowedRole, children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) {
+      if (!user || !user.emailVerified) {
         setIsAuthorized(false);
         setLoading(false);
         return;
@@ -21,11 +20,7 @@ const ProtectedRoute = ({ allowedRole, children }) => {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          if (userData.role === allowedRole) {
-            setIsAuthorized(true);
-          } else {
-            setIsAuthorized(false);
-          }
+          setIsAuthorized(userData.role === allowedRole);
         } else {
           setIsAuthorized(false);
         }
@@ -39,16 +34,8 @@ const ProtectedRoute = ({ allowedRole, children }) => {
     return () => unsubscribe();
   }, [allowedRole]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!isAuthorized) {
-    // Redirect to login page if not authorized
-    return <Navigate to="/" replace />;
-  }
-
-  // Render the protected component if authorized
+  if (loading) return <div className="text-center py-20 text-lg">Loading...</div>;
+  if (!isAuthorized) return <Navigate to="/" replace />;
   return children;
 };
 

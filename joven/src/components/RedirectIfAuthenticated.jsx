@@ -8,7 +8,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 const RedirectIfAuthenticated = ({ children }) => {
   const [checking, setChecking] = useState(true);
-  const [redirectPath, setRedirectPath] = useState(null);
+  const [redirectTo, setRedirectTo] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -18,17 +18,28 @@ const RedirectIfAuthenticated = ({ children }) => {
       }
 
       try {
-        const userDoc = await getDoc(doc(db, 'users', user.uid));
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          const { role } = data;
+        const userRef = doc(db, 'users', user.uid);
+        const userSnap = await getDoc(userRef);
 
-          if (role === 'Admin') setRedirectPath('/admin-dashboard');
-          else if (role === 'User') setRedirectPath('/user-dashboard');
-          else if (role === 'Staff') setRedirectPath('/staff-dashboard');
+        if (userSnap.exists()) {
+          const { role } = userSnap.data() || {};
+
+          switch (role) {
+            case 'Admin':
+              setRedirectTo('/admin-dashboard');
+              break;
+            case 'User':
+              setRedirectTo('/user-dashboard');
+              break;
+            case 'Staff':
+              setRedirectTo('/staff-dashboard');
+              break;
+            default:
+              setRedirectTo('/');
+          }
         }
-      } catch (err) {
-        console.error('Failed to fetch role during redirect:', err);
+      } catch (error) {
+        console.error('Error checking user role:', error);
       }
 
       setChecking(false);
@@ -38,7 +49,7 @@ const RedirectIfAuthenticated = ({ children }) => {
   }, []);
 
   if (checking) return <div>Checking authentication...</div>;
-  if (redirectPath) return <Navigate to={redirectPath} replace />;
+  if (redirectTo) return <Navigate to={redirectTo} replace />;
   return children;
 };
 

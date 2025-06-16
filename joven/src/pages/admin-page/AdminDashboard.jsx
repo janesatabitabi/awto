@@ -1,21 +1,21 @@
 import React from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import '../../styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const handleLogout = () => {
-    signOut(auth)
-      .then(() => {
-        window.location.href = '/login';
-      })
-      .catch((error) => {
-        console.error('Logout error:', error);
-        alert('Failed to logout. Please try again.');
-      });
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout error:', error);
+      alert('Logout failed. Please try again.');
+    }
   };
 
   const navItems = [
@@ -31,7 +31,8 @@ const AdminDashboard = () => {
 
   return (
     <div className="admin-dashboard">
-      <aside className="admin-sidebar">
+      {/* Sidebar */}
+      <aside className="admin-sidebar" aria-label="Sidebar Navigation">
         <div className="admin-sidebar-header">
           <h2 className="admin-logo">Joven Tire Admin</h2>
         </div>
@@ -55,14 +56,21 @@ const AdminDashboard = () => {
         </nav>
 
         <div className="admin-logout-container">
-          <button onClick={handleLogout} className="admin-logout-button">
+          <button
+            onClick={handleLogout}
+            className="admin-logout-button"
+            aria-label="Logout"
+          >
             Logout
           </button>
         </div>
       </aside>
 
+      {/* Main Content Area */}
       <main className="admin-main-content">
-        <Outlet />
+        <div className="admin-page-wrapper">
+          <Outlet />
+        </div>
       </main>
     </div>
   );

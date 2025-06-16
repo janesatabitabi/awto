@@ -1,85 +1,108 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { auth } from '../firebase';
+import { sendEmailVerification, reload } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 
 const Verify = () => {
   const navigate = useNavigate();
-  const [otpInput, setOtpInput] = useState('');
-  const [error, setError] = useState('');
+  const user = auth.currentUser;
 
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    const uid = localStorage.getItem('userUID');
-    const role = localStorage.getItem('userRole');
+  const [emailSent, setEmailSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const [isVerified, setIsVerified] = useState(user?.emailVerified || false);
 
-    if (!uid) {
-      setError('User not logged in.');
-      return;
+  useEffect(() => {
+    if (!user) return;
+
+    // Auto-send verification email if not yet sent
+    if (!emailSent && !user.emailVerified) {
+      sendVerificationEmail();
     }
 
+    let interval;
+    if (cooldown > 0) {
+      interval = setInterval(() => {
+        setCooldown((prev) => {
+          if (prev <= 1) clearInterval(interval);
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [cooldown, user]);
+
+  const sendVerificationEmail = () => {
+    if (user && !user.emailVerified) {
+      sendEmailVerification(user)
+        .then(() => {
+          setEmailSent(true);
+          setCooldown(60); // 60-second cooldown
+        })
+        .catch((err) => {
+          console.error('Verification email error:', err);
+          alert('Failed to send verification email.');
+        });
+    }
+  };
+
+  const checkVerification = async () => {
     try {
-      const docRef = doc(db, '2fa', uid);
-      const docSnap = await getDoc(docRef);
-
-      if (!docSnap.exists()) {
-        setError('No OTP found for user.');
-        return;
-      }
-
-      const { lastOTP, expiresAt } = docSnap.data();
-      const now = Date.now();
-
-      if (now > expiresAt) {
-        setError('OTP expired. Please login again.');
-        return;
-      }
-
-      if (otpInput === lastOTP) {
-        // ✅ Mark OTP as verified in localStorage
-        localStorage.setItem('isOTPVerified', 'true');
-
-        // ✅ Redirect based on role
-        if (role === 'Admin') {
-          navigate('/admin-dashboard');
-        } else if (role === 'User') {
-          navigate('/user-dashboard');
-        } else if (role === 'Staff') {
-          navigate('/staff-dashboard');
-        } else {
-          setError('Unauthorized role.');
-        }
+      await reload(user);
+      if (user.emailVerified) {
+        setIsVerified(true);
       } else {
-        setError('Invalid OTP.');
+        alert('Email is still not verified.');
       }
     } catch (err) {
-      console.error('OTP verification error:', err);
-      setError('Error verifying OTP.');
+      console.error('Error reloading user:', err);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="w-full max-w-sm bg-white p-6 rounded shadow">
-        <h2 className="text-xl font-semibold mb-4 text-center">Enter OTP</h2>
-        <form onSubmit={handleVerify}>
-          <input
-            type="text"
-            value={otpInput}
-            onChange={(e) => setOtpInput(e.target.value)}
-            placeholder="Enter the 6-digit OTP"
-            className="w-full p-2 border border-gray-300 rounded mb-4"
-            maxLength={6}
-            required
-          />
-          {error && <p className="text-red-500 mb-2">{error}</p>}
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-          >
-            Verify OTP
-          </button>
-        </form>
+    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 px-4">
+      <div className="bg-white p-8 rounded shadow-md max-w-md w-full text-center">
+        <h2 className="text-2xl font-bold mb-4 text-blue-600">Verify Your Email</h2>
+
+        {!isVerified ? (
+          <>
+            <p className="text-gray-700 mb-4">
+              We've sent a verification email to <strong>{user?.email}</strong>.
+              <br />
+              Please check your inbox (or spam folder).
+            </p>
+
+            {cooldown > 0 ? (
+              <p className="text-gray-500 mb-4">Resend available in {cooldown}s</p>
+            ) : (
+              <button
+                onClick={sendVerificationEmail}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded mb-4"
+              >
+                Resend Verification Email
+              </button>
+            )}
+
+            <button
+              onClick={checkVerification}
+              className="mt-2 text-sm text-blue-500 hover:underline"
+            >
+              I’ve already verified. Check again.
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-green-600 font-semibold mb-4">
+              Your email is now verified! 🎉
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded"
+            >
+              Go to Login
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

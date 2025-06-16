@@ -1,22 +1,22 @@
+// src/App.jsx
 import React, { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Navigate,
-  Outlet,
   useNavigate,
+  Navigate,
 } from 'react-router-dom';
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from './firebase';
 
-// Public pages
+// Public Pages
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
-import ViewProduct from "./components/ViewProduct"; // ✅ NEW COMPONENT
+import ViewProduct from './components/ViewProduct';
 
-// Admin pages
+// Admin Layout & Pages
 import AdminDashboard from './pages/admin-page/AdminDashboard';
 import AdminSales from './pages/admin-page/Sales';
 import AdminInventory from './pages/admin-page/Inventory';
@@ -26,104 +26,97 @@ import AdminReservations from './pages/admin-page/Reservations';
 import AdminCustomers from './pages/admin-page/Customers';
 import AdminSettings from './pages/admin-page/Settings';
 
-// User and Staff dashboards
+// User & Staff Dashboards
 import UserDashboard from './pages/user-page/UserDashboard';
 import StaffDashboard from './pages/staff-page/StaffDashboard';
 
-// Auth guard
+// Auth Guards
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
+import RequireVerifiedEmail from './components/RequireVerifiedEmail';
+import Verify from './pages/Verify';
 
+
+// Spinner Component
 const Spinner = () => (
   <div className="flex justify-center items-center h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
   </div>
 );
 
+// Protected Route Component
 const ProtectedRoute = ({ role, children }) => {
   const [loading, setLoading] = useState(true);
-  const [accessGranted, setAccessGranted] = useState(false);
+  const [granted, setGranted] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!user) {
-        setAccessGranted(false);
-        setLoading(false);
+        navigate('/login');
         return;
       }
 
       try {
-        const userRef = doc(db, 'users', user.uid);
-        const userSnap = await getDoc(userRef);
+        const ref = doc(db, 'users', user.uid);
+        const snap = await getDoc(ref);
 
-        if (!userSnap.exists()) {
-          setAccessGranted(false);
-          setLoading(false);
-          return;
+        if (snap.exists()) {
+          const { role: userRole } = snap.data();
+          if (userRole === role) {
+            setGranted(true);
+          } else {
+            navigate('/');
+          }
         }
-
-        const userData = userSnap.data();
-        const userRole = userData.role;
-
-        if (userRole === role) {
-          setAccessGranted(true);
-        } else {
-          navigate('/');
-          setAccessGranted(false);
-        }
-      } catch (err) {
-        console.error('ProtectedRoute error:', err);
-        setAccessGranted(false);
+      } catch (error) {
+        console.error('Auth check failed:', error);
       }
 
       setLoading(false);
     });
 
     return () => unsubscribe();
-  }, [navigate, role]);
+  }, [role, navigate]);
 
   if (loading) return <Spinner />;
-  return accessGranted ? children : null;
+  return granted ? children : null;
 };
 
-const AdminLayout = () => (
-  <>
-    <AdminDashboard />
-    <Outlet />
-  </>
-);
-
+// Main App
 function App() {
-  useEffect(() => {
-    // Optional logout on refresh for testing/dev
-    signOut(auth);
-    localStorage.clear();
-  }, []);
-
   return (
     <Router>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={
-          <RedirectIfAuthenticated>
-            <LandingPage />
-          </RedirectIfAuthenticated>
-        } />
-        <Route path="/register" element={
-          <RedirectIfAuthenticated>
-            <Register />
-          </RedirectIfAuthenticated>
-        } />
-        <Route path="/view-product/:id" element={<ViewProduct />} /> {/* ✅ NEW ROUTE */}
+        <Route
+          path="/login"
+          element={
+            <RedirectIfAuthenticated>
+              <LandingPage />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <RedirectIfAuthenticated>
+              <Register />
+            </RedirectIfAuthenticated>
+          }
+        />
+        <Route path="/verify" element={<Verify />} />
+        <Route path="/view-product/:id" element={<ViewProduct />} />
 
-        {/* Admin Protected Routes */}
+        {/* Admin Protected Routes with Email Verification */}
         <Route
           path="/admin-dashboard"
           element={
-            // <ProtectedRoute role="Admin"> 
-              <AdminLayout />
-            // </ProtectedRoute>
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="Admin">
+                <AdminDashboard />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
           }
         >
           <Route index element={<AdminSales />} />
@@ -136,23 +129,27 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* User Protected Route */}
+        {/* User Dashboard with Email Verification */}
         <Route
           path="/user-dashboard"
           element={
-            <ProtectedRoute role="User">
-              <UserDashboard />
-            </ProtectedRoute>
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="User">
+                <UserDashboard />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
           }
         />
 
-        {/* Staff Protected Route */}
+        {/* Staff Dashboard with Email Verification */}
         <Route
           path="/staff-dashboard"
           element={
-            <ProtectedRoute role="Staff">
-              <StaffDashboard />
-            </ProtectedRoute>
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="Staff">
+                <StaffDashboard />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
           }
         />
       </Routes>

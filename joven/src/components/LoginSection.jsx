@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
@@ -13,9 +12,20 @@ const LoginSection = ({ onClose }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
+  // ✅ Update: allow login for admin and users using gmail
+  const isAllowedEmail = () => {
+    const trimmedEmail = email.trim().toLowerCase();
+    return trimmedEmail.endsWith('@gmail.com');
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!isAllowedEmail()) {
+      setError('Enter a valid email.');
+      return;
+    }
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -25,29 +35,21 @@ const LoginSection = ({ onClose }) => {
       const userSnap = await getDoc(userRef);
 
       if (!userSnap.exists()) {
-        setError('User data not found.');
+        setError('User data not found in Firestore.');
         return;
       }
 
       const userData = userSnap.data();
       const role = userData.role;
 
-      // Optional: clear any OTP verification flags
       localStorage.setItem('isOTPVerified', 'true');
 
-      // Redirect based on role
-      if (role === 'Admin') {
-        navigate('/admin-dashboard');
-      } else if (role === 'User') {
-        navigate('/user-dashboard');
-      } else if (role === 'Staff') {
-        navigate('/staff-dashboard');
-      } else {
-        setError('Unknown user role.');
-      }
+      if (role === 'Admin') navigate('/admin-dashboard');
+      else if (role === 'User') navigate('/user-dashboard');
+      else if (role === 'Staff') navigate('/staff-dashboard');
+      else setError('Unknown user role.');
 
-      if (onClose) onClose(); // Close popup if provided
-
+      if (onClose) onClose();
     } catch (err) {
       console.error(err);
       setError('Invalid email or password.');
@@ -73,7 +75,13 @@ const LoginSection = ({ onClose }) => {
             required
           />
 
-          <label className="form-label">Password</label>
+          {!isAllowedEmail() && email && (
+            <p style={{ color: 'red', fontSize: '0.875rem' }}>
+              Please enter a valid email.
+            </p>
+          )}
+
+          <label className="form-label mt-3">Password</label>
           <div className="password-wrapper">
             <input
               type={showPassword ? 'text' : 'password'}
@@ -92,17 +100,21 @@ const LoginSection = ({ onClose }) => {
             </button>
           </div>
 
-          <button type="submit" className="explore-button" style={{ marginTop: '1.5rem' }}>
+          <button type="submit" className="explore-button mt-5">
             Login
           </button>
         </form>
 
-        <p className="create-account-text">
-          Don’t have an account?{' '}
-          <Link className="link" to="/register" onClick={onClose}>
-            Create one
+        <div className="mt-4">
+          <p className="text-sm text-center mb-2">Don’t have an account?</p>
+          <Link
+            to="/register"
+            onClick={onClose}
+            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 text-center rounded transition-all duration-200"
+          >
+            Create an account
           </Link>
-        </p>
+        </div>
       </div>
     </div>
   );
