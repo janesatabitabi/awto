@@ -2,10 +2,11 @@
 
 // Firebase Initialization
 import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
+// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyA2oBqELFCq7nXVTDKGNa2ssKE10etHtdk",
   authDomain: "awto-b8b30.firebaseapp.com",
@@ -16,14 +17,14 @@ const firebaseConfig = {
   measurementId: "G-V6K71Q2YSR"
 };
 
-// Initialize Firebase
+// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize Services
-const analytics = getAnalytics(app);
+// Initialize Firebase Services
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 // Export for use in other components
-export { auth, provider, db };
+export { auth, provider, db, storage };
