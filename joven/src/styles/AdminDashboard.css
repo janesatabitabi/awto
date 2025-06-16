@@ -1,3 +1,8 @@
+/* src/styles/AdminDashboard.css */
+
+/* Custom Font Import (Optional: if not globally imported in index.css) */
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap'); */
+
 /* Reset some basic styles */
 * {
   box-sizing: border-box;
@@ -5,125 +10,241 @@
   padding: 0;
 }
 
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden; /* Prevent body scroll if main-content handles scroll */
+}
+
 /* Overall layout */
 .admin-dashboard {
   display: flex;
   min-height: 100vh;
-  background-color: #f4f6f9;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  
+  /* Enhanced background gradient */
+  background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+  font-family: 'Inter', sans-serif; /* Prefer Inter font */
+  color: #333;
 }
 
 /* Sidebar */
 .admin-sidebar {
   width: 250px;
-  background-color: #111827;
-  color: #ffffff;
+  background-color: #1a202c; /* Deeper, richer dark blue */
+  color: #e0e0e0; /* Lighter text for contrast */
   display: flex;
   flex-direction: column;
-  padding: 20px;
-  transition: width 0.3s ease;
+  padding: 25px 20px; /* Increased top/bottom padding */
+  transition: width 0.3s ease-in-out, background-color 0.3s ease-in-out;
   position: sticky;
   top: 0;
+  left: 0;
+  height: 100vh; /* Ensure sidebar takes full height */
+  box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1); /* Subtle shadow on the right */
+  overflow-y: auto; /* Allow sidebar content to scroll if it overflows */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #4a5568 #2d3748; /* Firefox thumb and track */
 }
+
+/* Custom Scrollbar for Webkit browsers (Chrome, Safari) */
+.admin-sidebar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: #2d3748;
+  border-radius: 10px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background-color: #4a5568;
+  border-radius: 10px;
+  border: 2px solid #2d3748;
+}
+
 
 /* Logo/Header */
 .admin-sidebar-header {
-  margin-bottom: 40px;
+  margin-bottom: 50px; /* More space */
   text-align: center;
 }
 
 .admin-logo {
-  font-size: 22px;
-  font-weight: bold;
-  color: #38bdf8;
+  font-size: 26px; /* Slightly larger */
+  font-weight: 900; /* Bolder */
+  color: #63b3ed; /* Brighter blue for logo */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2); /* Subtle text shadow */
+  letter-spacing: 0.05em; /* Slightly spaced out */
 }
 
 /* Navigation */
 .admin-nav-list {
   list-style-type: none;
+  padding: 0;
 }
 
 .admin-nav-link {
-  display: block;
-  padding: 12px 20px;
-  margin-bottom: 8px;
-  border-radius: 10px;
-  color: #cbd5e1;
+  display: flex; /* Use flex for icon/text alignment */
+  align-items: center;
+  padding: 14px 20px; /* More padding */
+  margin-bottom: 10px; /* More margin between items */
+  border-radius: 12px; /* More rounded corners */
+  color: #a0aec0; /* Softer text color */
   text-decoration: none;
-  font-size: 16px;
-  transition: background 0.2s, color 0.2s;
+  font-size: 17px; /* Slightly larger font */
+  font-weight: 500; /* Medium weight */
+  transition: background-color 0.25s ease-in-out, color 0.25s ease-in-out, transform 0.1s ease-out; /* Smoother transitions */
 }
 
 .admin-nav-link:hover {
-  background-color: #1e293b;
+  background-color: #2d3748; /* Darker hover background */
   color: #ffffff;
+  transform: translateX(5px); /* Subtle slide effect on hover */
 }
 
 .admin-nav-link.active {
-  background-color: #2563eb;
+  background-color: #4299e1; /* Vibrant blue active state */
   color: #ffffff;
+  font-weight: 600; /* Bolder active text */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for active item */
 }
+
+/* If you use icons, add some margin */
+.admin-nav-link .icon {
+  margin-right: 12px;
+  font-size: 20px; /* Adjust icon size */
+}
+
 
 /* Logout Button */
 .admin-logout-container {
-  margin-top: auto;
+  margin-top: auto; /* Pushes logout button to the bottom */
+  padding-top: 20px; /* Space above button */
 }
 
 .admin-logout-button {
   width: 100%;
-  padding: 12px;
+  padding: 14px; /* More padding */
   border: none;
-  background-color: #ef4444;
+  background-color: #e53e3e; /* Brighter red */
   color: white;
   font-weight: bold;
-  border-radius: 8px;
+  border-radius: 10px; /* More rounded */
   cursor: pointer;
-  transition: background 0.3s;
+  font-size: 17px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  transition: background-color 0.3s ease-in-out, transform 0.1s ease-out, box-shadow 0.3s ease-in-out;
 }
 
 .admin-logout-button:hover {
-  background-color: #dc2626;
+  background-color: #c53030; /* Darker red on hover */
+  transform: translateY(-2px); /* Lift effect */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.admin-logout-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Main Content */
 .admin-main-content {
   flex-grow: 1;
   padding: 30px;
-  background-color: #f9fafb;
-  overflow-y: auto;
+  background-color: #ffffff; /* Pure white for clean content area */
+  overflow-y: auto; /* Allow main content to scroll */
+  border-top-left-radius: 15px; /* Slight rounding where it meets sidebar */
+  border-bottom-left-radius: 15px;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.05); /* Subtle shadow on the left */
+  /* Custom Scrollbar for Webkit browsers */
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #a0aec0 #edf2f7; /* Firefox thumb and track */
 }
+
+.admin-main-content::-webkit-scrollbar {
+  width: 10px;
+}
+
+.admin-main-content::-webkit-scrollbar-track {
+  background: #edf2f7; /* Light track */
+  border-radius: 10px;
+}
+
+.admin-main-content::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* Grey thumb */
+  border-radius: 10px;
+  border: 2px solid #edf2f7;
+}
+
 
 /* Responsive Design */
 @media screen and (max-width: 768px) {
   .admin-dashboard {
     flex-direction: column;
   }
-
+/*ssssssssssssssssssssssssssssssssssssssssssssssssssssss*/
   .admin-sidebar {
     width: 100%;
+    height: auto; /* Allow height to adapt */
     flex-direction: row;
-    overflow-x: auto;
-    padding: 10px;
+    justify-content: space-between; /* Space out items */
+    overflow-x: auto; /* Horizontal scroll for nav if needed */
+    padding: 15px; /* Adjust padding */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Shadow at the bottom */
+    position: relative; /* Not sticky on mobile if you want to scroll with content */
+    border-radius: 0; /* Remove rounding */
+    padding-bottom: 15px; /* Extra padding for logo/logout */
+  }
+
+  .admin-sidebar-header {
+    margin-bottom: 0;
+    margin-right: 20px; /* Space between logo and nav */
+  }
+
+  .admin-logo {
+    font-size: 20px;
   }
 
   .admin-nav-list {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
-    gap: 10px;
+    gap: 12px; /* Adjust gap between nav items */
+    overflow-x: auto; /* Allow horizontal scroll for nav links */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    padding-bottom: 5px; /* Prevents scrollbar from overlapping content */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+  }
+
+  .admin-nav-list::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for Webkit */
   }
 
   .admin-nav-link {
-    padding: 10px 16px;
+    padding: 10px 15px;
     margin: 0;
-    border-radius: 6px;
-    font-size: 14px;
+    border-radius: 8px;
+    font-size: 15px;
     white-space: nowrap;
+    min-width: fit-content; /* Ensure items don't shrink too much */
+  }
+
+  .admin-logout-container {
+    margin-top: 0; /* No auto margin on mobile sidebar */
+    margin-left: auto; /* Push to right */
+    padding-top: 0;
+    align-self: center; /* Center logout button vertically */
   }
 
   .admin-logout-button {
-    padding: 10px;
-    font-size: 14px;
+    padding: 10px 15px; /* Adjust padding */
+    font-size: 15px;
+    width: auto; /* Auto width on mobile */
+  }
+
+  .admin-main-content {
+    padding: 20px; /* Reduce padding on mobile */
+    border-top-left-radius: 0; /* Remove rounding on top for mobile */
+    border-bottom-left-radius: 0;
+    box-shadow: none; /* Remove shadow on mobile */
   }
 }

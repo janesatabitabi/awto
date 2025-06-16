@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-// Mock product data for demonstration.
-// In a real application, you would fetch this from an API or Firestore.
-const mockProducts = [
+const initialMockProducts = [
   {
     id: 'prod001',
     name: 'Michelin Pilot Sport 4',
@@ -12,7 +10,7 @@ const mockProducts = [
     description: 'High-performance summer tire offering excellent grip and handling. Known for its exceptional wet and dry performance.',
     weight: '10 kg',
     dimensions: '225/45R17',
-    image: 'https://placehold.co/100x100/A0D9D9/333333?text=Tire+A' // Placeholder image
+    image: 'https://placehold.co/100x100/A0D9D9/333333?text=Tire+A'
   },
   {
     id: 'prod002',
@@ -23,7 +21,7 @@ const mockProducts = [
     description: 'Durable all-terrain tire suitable for both on and off-road driving. Features an aggressive tread pattern for traction.',
     weight: '15 kg',
     dimensions: '265/70R16',
-    image: 'https://placehold.co/100x100/F0B27A/333333?text=Tire+B' // Placeholder image
+    image: 'https://placehold.co/100x100/F0B27A/333333?text=Tire+B'
   },
   {
     id: 'prod003',
@@ -34,7 +32,7 @@ const mockProducts = [
     description: 'Eco-friendly touring tire designed for comfort and fuel efficiency. Provides a quiet and smooth ride.',
     weight: '9 kg',
     dimensions: '205/55R16',
-    image: 'https://placehold.co/100x100/C0C0C0/333333?text=Tire+C' // Placeholder image
+    image: 'https://placehold.co/100x100/C0C0C0/333333?text=Tire+C'
   },
   {
     id: 'prod004',
@@ -45,43 +43,144 @@ const mockProducts = [
     description: 'Extreme off-road tire with excellent traction in mud and soft soil. Built for rugged conditions and maximum durability.',
     weight: '20 kg',
     dimensions: '33X12.50R15',
-    image: 'https://placehold.co/100x100/87CEEB/333333?text=Tire+D' // Placeholder image
+    image: 'https://placehold.co/100x100/87CEEB/333333?text=Tire+D'
   }
 ];
 
 // Main Products component
 const Products = () => {
-  const [products, setProducts] = useState([]);
-  const [selectedProduct, setSelectedProduct] = useState(null); // State for product details modal
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  // Initialize state from localStorage, or use initialMockProducts if empty
+  const [products, setProducts] = useState(() => {
+    try {
+      const storedProducts = localStorage.getItem('products');
+      return storedProducts ? JSON.parse(storedProducts) : initialMockProducts;
+    } catch (error) {
+      console.error("Failed to read products from localStorage:", error);
+      return initialMockProducts;
+    }
+  });
 
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [formMode, setFormMode] = useState('add');
+
+  const [formData, setFormData] = useState({
+    id: '',
+    name: '',
+    category: '',
+    stock: '',
+    price: '',
+    description: '',
+    image: ''
+  });
+
+  // Save products to localStorage whenever the products state changes
   useEffect(() => {
-    // Simulate fetching data
-    // In a real app, this would be an async call to your backend/Firestore
-    const fetchProducts = () => {
-      // If no products found, you can set products to an empty array
-      // setProducts([]);
-      setProducts(mockProducts);
-    };
+    try {
+      localStorage.setItem('products', JSON.stringify(products));
+    } catch (error) {
+      console.error("Failed to save products to localStorage:", error);
+    }
+  }, [products]); // Dependency array includes 'products' so this runs on every change
 
-    fetchProducts();
-  }, []); // Empty dependency array means this runs once on mount
+  // --- Utility Functions ---
+  const generateProductId = () => {
+    return 'prod' + Math.random().toString(36).substr(2, 9);
+  };
 
-  // Function to open the details modal
+  const resetFormData = () => {
+    setFormData({
+      id: '',
+      name: '',
+      category: '',
+      stock: '',
+      price: '',
+      description: '',
+      image: ''
+    });
+  };
+
+  // --- Handlers for Product Actions ---
+
   const handleViewDetails = (product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
   };
 
-  // Function to close the details modal
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProduct(null);
   };
 
+  const handleAddProduct = () => {
+    setFormMode('add');
+    resetFormData();
+    setIsFormModalOpen(true);
+  };
+
+  const handleEditProduct = (product) => {
+    setFormMode('edit');
+    setFormData({
+      id: product.id,
+      name: product.name,
+      category: product.category,
+      stock: product.stock,
+      price: product.price,
+      description: product.description,
+      image: product.image
+    });
+    setIsFormModalOpen(true);
+  };
+
+  const handleDeleteProduct = (productId) => {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      setProducts(products.filter(product => product.id !== productId));
+    }
+  };
+
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: (name === 'stock' || name === 'price') ? Number(value) : value
+    }));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+
+    if (formMode === 'add') {
+      const newProduct = {
+        ...formData,
+        id: generateProductId(),
+        weight: 'N/A',
+        dimensions: 'N/A'
+      };
+      setProducts([...products, newProduct]);
+    } else {
+      setProducts(products.map(product =>
+        product.id === formData.id ? { ...product, ...formData } : product
+      ));
+    }
+    setIsFormModalOpen(false);
+    resetFormData();
+  };
+
+  const handleCloseFormModal = () => {
+    setIsFormModalOpen(false);
+    resetFormData();
+  };
+
+  const getStockStatusClass = (stock) => {
+    if (stock > 20) return 'stock-high';
+    if (stock > 5) return 'stock-medium';
+    return 'stock-low';
+  };
+
   return (
     <div className="products-page-container">
-      {/* Embedded CSS for this component */}
+      {/* Embedded CSS remains the same */}
       <style>
         {`
         /* Keyframe animations for modal */
@@ -125,6 +224,7 @@ const Products = () => {
           border-radius: 1rem;
           box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
           border: 1px solid #e2e8f0;
+          margin-bottom: 2rem; /* Added margin for spacing */
         }
 
         .product-overview-title {
@@ -141,6 +241,37 @@ const Products = () => {
           padding-top: 3rem;
           padding-bottom: 3rem;
         }
+
+        /* Add Product Button */
+        .add-product-button-container {
+          text-align: right;
+          margin-bottom: 1.5rem;
+        }
+
+        .add-product-button {
+          background-color: #10b981;
+          color: #ffffff;
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+          transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+          border: none;
+          cursor: pointer;
+          font-weight: 600;
+          outline: none;
+        }
+
+        .add-product-button:hover {
+          background-color: #059669;
+          transform: scale(1.03);
+          box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-product-button:focus {
+          outline: none;
+          box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.5);
+        }
+
 
         /* Product table styling */
         .product-table-wrapper {
@@ -253,32 +384,52 @@ const Products = () => {
 
         .actions-cell {
           text-align: center;
+          display: flex;
+          gap: 0.5rem;
+          justify-content: center;
+          white-space: normal;
+        }
+
+        .action-button {
+          padding: 0.5rem 0.75rem;
+          border-radius: 0.5rem;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+          transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+          border: none;
+          cursor: pointer;
+          font-size: 0.875rem;
+          font-weight: 500;
+          outline: none;
         }
 
         .view-details-button {
           background-color: #3b82f6;
           color: #ffffff;
-          padding: 0.5rem 1rem;
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
-          transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-          border: none;
-          cursor: pointer;
-          outline: none;
         }
-
         .view-details-button:hover {
           background-color: #2563eb;
-          transform: scale(1.05);
-          box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1);
+          transform: translateY(-2px);
         }
 
-        .view-details-button:focus {
-          outline: none;
-          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
+        .edit-button {
+          background-color: #f59e0b;
+          color: #ffffff;
+        }
+        .edit-button:hover {
+          background-color: #d97706;
+          transform: translateY(-2px);
         }
 
-        /* Modal Styling */
+        .delete-button {
+          background-color: #ef4444;
+          color: #ffffff;
+        }
+        .delete-button:hover {
+          background-color: #dc2626;
+          transform: translateY(-2px);
+        }
+
+        /* Modal Styling (for Product Details) */
         .modal-overlay {
           position: fixed;
           top: 0;
@@ -303,6 +454,7 @@ const Products = () => {
           max-width: 32rem;
           border: 1px solid #e2e8f0;
           animation: slideUp 0.3s ease-out forwards;
+          position: relative; /* For close button positioning */
         }
 
         .modal-title {
@@ -312,6 +464,7 @@ const Products = () => {
           margin-bottom: 1.25rem;
           padding-bottom: 0.75rem;
           border-bottom: 2px solid #bfdbfe;
+          text-align: center;
         }
 
         .modal-image-wrapper {
@@ -384,6 +537,95 @@ const Products = () => {
           box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.5);
         }
 
+        /* Form Modal Styling */
+        .form-modal-content {
+          background-color: #ffffff;
+          border-radius: 1rem;
+          box-shadow: 0 20px 25px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.1);
+          padding: 2rem;
+          width: 100%;
+          max-width: 36rem; /* Back to original wider size for more fields */
+          border: 1px solid #e2e8f0;
+          animation: slideUp 0.3s ease-out forwards;
+          position: relative;
+        }
+
+        .form-modal-title {
+          font-size: 2rem;
+          font-weight: 700;
+          color: #059669;
+          margin-bottom: 1.5rem;
+          padding-bottom: 0.75rem;
+          border-bottom: 2px solid #a7f3d0;
+          text-align: center;
+        }
+
+        .form-group {
+          margin-bottom: 1rem;
+        }
+
+        .form-group label {
+          display: block;
+          font-weight: 600;
+          color: #333;
+          margin-bottom: 0.5rem;
+          font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+          width: 100%;
+          padding: 0.75rem 1rem;
+          border: 1px solid #cbd5e0;
+          border-radius: 0.5rem;
+          font-size: 1rem;
+          color: #4a5568;
+          transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+          outline: none;
+          border-color: #3b82f6;
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        }
+
+        .form-actions {
+          margin-top: 2rem;
+          display: flex;
+          justify-content: flex-end;
+          gap: 1rem;
+        }
+
+        .form-submit-button,
+        .form-cancel-button {
+          padding: 0.75rem 1.5rem;
+          border-radius: 0.5rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease-in-out;
+          border: none;
+        }
+
+        .form-submit-button:hover {
+          background-color: #16a34a;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-cancel-button {
+          background-color: #ef4444;
+          color: #ffffff;
+        }
+
+        .form-cancel-button:hover {
+          background-color: #dc2626;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
         /* Responsive adjustments */
         @media (min-width: 768px) {
           .modal-details-grid {
@@ -401,7 +643,11 @@ const Products = () => {
       </h1>
 
       <div className="product-overview-card">
-        <h2 className="product-overview-title">Product Overview</h2>
+        <div className="add-product-button-container">
+          <button onClick={handleAddProduct} className="add-product-button">
+            + Add New Product
+          </button>
+        </div>
 
         {products.length === 0 ? (
           <p className="no-products-message">
@@ -437,7 +683,7 @@ const Products = () => {
                         src={product.image}
                         alt={product.name}
                         className="product-image"
-                        onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/100x100/CCCCCC/666666?text=No+Img'; }}
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/100x100/CCCCCC/666666?text=No+Img'; }}
                       />
                       {product.name}
                     </td>
@@ -445,11 +691,7 @@ const Products = () => {
                       {product.category}
                     </td>
                     <td className="table-data">
-                      <span className={`stock-status-badge ${
-                        product.stock > 20 ? 'stock-high' :
-                        product.stock > 5 ? 'stock-medium' :
-                        'stock-low'
-                      }`}>
+                      <span className={`stock-status-badge ${getStockStatusClass(product.stock)}`}>
                         {product.stock} in stock
                       </span>
                     </td>
@@ -459,9 +701,21 @@ const Products = () => {
                     <td className="table-data actions-cell">
                       <button
                         onClick={() => handleViewDetails(product)}
-                        className="view-details-button"
+                        className="action-button view-details-button"
                       >
-                        View Details
+                        View
+                      </button>
+                      <button
+                        onClick={() => handleEditProduct(product)}
+                        className="action-button edit-button"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteProduct(product.id)}
+                        className="action-button delete-button"
+                      >
+                        Delete
                       </button>
                     </td>
                   </tr>
@@ -480,20 +734,20 @@ const Products = () => {
               {selectedProduct.name}
             </h2>
             <div className="modal-image-wrapper">
-                <img
-                    src={selectedProduct.image}
-                    alt={selectedProduct.name}
-                    className="modal-product-image"
-                    onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/150x150/CCCCCC/666666?text=No+Img'; }}
-                />
+              <img
+                src={selectedProduct.image}
+                alt={selectedProduct.name}
+                className="modal-product-image"
+                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/150x150/CCCCCC/666666?text=No+Img'; }}
+              />
             </div>
             <div className="modal-details-grid">
               <p><strong>Category:</strong> <span>{selectedProduct.category}</span></p>
-              <p><strong>Stock:</strong> <span>{selectedProduct.stock} units</span></p> {/* Corrected closing tag */}
+              <p><strong>Stock:</strong> <span>{selectedProduct.stock} units</span></p>
               <p><strong>Price:</strong> <span>${selectedProduct.price.toFixed(2)}</span></p>
-              <p><strong>Description:</strong> <span className="modal-description">{selectedProduct.description}</span></p>
               <p><strong>Weight:</strong> <span>{selectedProduct.weight}</span></p>
               <p><strong>Dimensions:</strong> <span>{selectedProduct.dimensions}</span></p>
+              <p className="modal-description"><strong>Description:</strong> <span>{selectedProduct.description}</span></p>
             </div>
             <div className="modal-actions">
               <button
@@ -503,6 +757,103 @@ const Products = () => {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Product Form Modal - WITH CATEGORY AND STOCK */}
+      {isFormModalOpen && (
+        <div className="modal-overlay">
+          <div className="form-modal-content">
+            <h2 className="form-modal-title">
+              {formMode === 'add' ? 'Add New Product' : 'Edit Product'}
+            </h2>
+            <form onSubmit={handleFormSubmit}>
+              <div className="form-group">
+                <label htmlFor="image">Photo (Image URL):</label>
+                <input
+                  type="url"
+                  id="image"
+                  name="image"
+                  value={formData.image}
+                  onChange={handleFormChange}
+                  placeholder="e.g., https://example.com/product-image.jpg"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="name">Product Name:</label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="category">Category:</label>
+                <input
+                  type="text"
+                  id="category"
+                  name="category"
+                  value={formData.category}
+                  onChange={handleFormChange}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="stock">Stock:</label>
+                <input
+                  type="number"
+                  id="stock"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleFormChange}
+                  min="0"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="price">Price ($):</label>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleFormChange}
+                  step="0.01"
+                  min="0"
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="description">Description:</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formData.description}
+                  onChange={handleFormChange}
+                  rows="3"
+                ></textarea>
+              </div>
+
+              <div className="form-actions">
+                <button
+                  type="button"
+                  onClick={handleCloseFormModal}
+                  className="form-cancel-button"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="form-submit-button"
+                >
+                  {formMode === 'add' ? 'Add Product' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -4,16 +4,23 @@ import {
   BarChart, Bar, PieChart, Pie, Cell, Sector
 } from 'recharts';
 
-// Mock Sales Data
-// In a real application, you would fetch this from an API or Firestore.
-const mockMonthlySales = [
-  { name: 'Jan', totalSales: 4000, newCustomers: 2400 },
-  { name: 'Feb', totalSales: 3000, newCustomers: 1398 },
-  { name: 'Mar', totalSales: 5000, newCustomers: 2800 },
-  { name: 'Apr', totalSales: 4500, newCustomers: 3908 },
-  { name: 'May', totalSales: 6000, newCustomers: 4800 },
-  { name: 'Jun', totalSales: 5500, newCustomers: 3800 },
-  { name: 'Jul', totalSales: 7000, newCustomers: 4300 },
+// Enhanced Mock Sales Data with year
+const allMonthlySales = [
+  { name: 'Jan', year: 2024, totalSales: 4000, newCustomers: 2400 },
+  { name: 'Feb', year: 2024, totalSales: 3000, newCustomers: 1398 },
+  { name: 'Mar', year: 2024, totalSales: 5000, newCustomers: 2800 },
+  { name: 'Apr', year: 2024, totalSales: 4500, newCustomers: 3908 },
+  { name: 'May', year: 2024, totalSales: 6000, newCustomers: 4800 },
+  { name: 'Jun', year: 2024, totalSales: 5500, newCustomers: 3800 },
+  { name: 'Jul', year: 2024, totalSales: 7000, newCustomers: 4300 },
+  { name: 'Aug', year: 2024, totalSales: 6200, newCustomers: 4000 },
+  { name: 'Sep', year: 2024, totalSales: 6800, newCustomers: 4500 },
+  { name: 'Oct', year: 2024, totalSales: 7500, newCustomers: 5000 },
+  { name: 'Nov', year: 2024, totalSales: 8000, newCustomers: 5200 },
+  { name: 'Dec', year: 2024, totalSales: 9000, newCustomers: 5500 },
+  { name: 'Jan', year: 2025, totalSales: 7500, newCustomers: 4800 },
+  { name: 'Feb', year: 2025, totalSales: 6800, newCustomers: 4200 },
+  { name: 'Mar', year: 2025, totalSales: 8500, newCustomers: 5100 },
 ];
 
 const mockProductCategorySales = [
@@ -25,27 +32,39 @@ const mockProductCategorySales = [
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 
-// Main Sales component
 const Sales = () => {
   const [monthlySalesData, setMonthlySalesData] = useState([]);
-  const [categorySalesData, setCategorySalesData] = useState([]);
+  const [categorySalesData, setCategorySalesData] = useState(mockProductCategorySales); // Fixed category sales for simplicity
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [totalTransactions, setTotalTransactions] = useState(0);
+  const [todaysSales, setTodaysSales] = useState(1250); // Mock for today's sales
 
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedMonth, setSelectedMonth] = useState('All'); // 'All' or month name
+
+  // Extract unique years from mock data
+  const availableYears = Array.from(new Set(allMonthlySales.map(d => d.year.toString()))).sort((a, b) => b - a);
+  const availableMonths = ['All', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // Effect to filter monthly sales data based on selected year/month
   useEffect(() => {
-    // Simulate fetching data
-    const fetchSalesData = () => {
-      setMonthlySalesData(mockMonthlySales);
-      setCategorySalesData(mockProductCategorySales);
+    let filteredData = allMonthlySales;
 
-      // Calculate total revenue and transactions from mock data
-      const revenue = mockMonthlySales.reduce((acc, month) => acc + month.totalSales, 0);
-      setTotalRevenue(revenue);
-      setTotalTransactions(mockMonthlySales.length * 50); // Arbitrary number for transactions
-    };
+    if (selectedYear !== 'All') {
+      filteredData = filteredData.filter(d => d.year.toString() === selectedYear);
+    }
+    if (selectedMonth !== 'All') {
+      filteredData = filteredData.filter(d => d.name === selectedMonth);
+    }
 
-    fetchSalesData();
-  }, []);
+    setMonthlySalesData(filteredData);
+
+    // Recalculate total revenue and transactions for the filtered data
+    const revenue = filteredData.reduce((acc, month) => acc + month.totalSales, 0);
+    setTotalRevenue(revenue);
+    setTotalTransactions(filteredData.length * 50); // Simple arbitrary transaction count for filtered data
+  }, [selectedYear, selectedMonth]);
+
 
   return (
     <div className="sales-page-container">
@@ -79,9 +98,56 @@ const Sales = () => {
           animation: fadeIn 0.5s ease-out;
         }
 
+        .sales-filter-controls {
+            background-color: #ffffff;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e3f2fd;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 1rem;
+            align-items: center;
+            animation: fadeIn 0.7s ease-out 0.1s forwards;
+            opacity: 0;
+        }
+
+        .sales-filter-controls label {
+            font-weight: 600;
+            color: #424242;
+            margin-right: 0.5rem;
+        }
+
+        .sales-filter-controls select {
+            padding: 0.6rem 1rem;
+            border: 1px solid #bbdefb; /* Light blue border */
+            border-radius: 0.5rem;
+            background-color: #e3f2fd; /* Very light blue background */
+            font-size: 1rem;
+            color: #0d47a1; /* Darker blue text */
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            appearance: none; /* Remove default select arrow */
+            background-image: url('data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>');
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 1em;
+        }
+
+        .sales-filter-controls select:hover {
+            border-color: #64b5f6;
+            background-color: #cde2f8; /* Slightly darker light blue */
+        }
+
+        .sales-filter-controls select:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(100, 181, 246, 0.4); /* Blue focus ring */
+        }
+
         .sales-overview-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Min width reduced slightly */
           gap: 1.5rem;
           margin-bottom: 2rem;
           animation: fadeIn 0.7s ease-out 0.2s forwards;
@@ -95,6 +161,12 @@ const Sales = () => {
           box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
           border: 1px solid #e3f2fd; /* Light blue border */
           text-align: center;
+          transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
         }
 
         .metric-card h3 {
@@ -148,6 +220,23 @@ const Sales = () => {
 
       <h1 className="sales-page-title">Sales Overview</h1>
 
+      <div className="sales-filter-controls">
+        <label htmlFor="year-select">Filter by Year:</label>
+        <select id="year-select" value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
+          <option value="All">All Years</option>
+          {availableYears.map(year => (
+            <option key={year} value={year}>{year}</option>
+          ))}
+        </select>
+
+        <label htmlFor="month-select">Filter by Month:</label>
+        <select id="month-select" value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+          {availableMonths.map(month => (
+            <option key={month} value={month}>{month}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="sales-overview-grid">
         <div className="metric-card">
           <h3>Total Revenue</h3>
@@ -157,11 +246,14 @@ const Sales = () => {
           <h3>Total Transactions</h3>
           <p>{totalTransactions.toLocaleString()}</p>
         </div>
-        {/* Add more metrics as needed */}
+        <div className="metric-card">
+          <h3>Today's Sales</h3>
+          <p>${todaysSales.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+        </div>
       </div>
 
       <div className="chart-section">
-        <h3>Monthly Sales Trends</h3>
+        <h3>Monthly Sales Trends {selectedYear !== 'All' && `for ${selectedYear}`}</h3>
         <div className="responsive-chart">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart

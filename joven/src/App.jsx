@@ -69,7 +69,7 @@ function App() {
             <AdminDashboard />
           </ProtectedRoute>
         }>
-          <Route index element={<AdminSales />} />
+          <Route index element={<AdminDashboard />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="products" element={<AdminProducts />} />
