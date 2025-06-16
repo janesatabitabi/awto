@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { db, storage } from '../../firebase';
+import { db } from '../../firebase';
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc, doc
 } from 'firebase/firestore';
-import {
-  ref, uploadBytes, getDownloadURL
-} from 'firebase/storage';
 import '../../styles/AdminDashboard.css';
-
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -16,7 +12,7 @@ const Products = () => {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [formMode, setFormMode] = useState('add');
   const [formData, setFormData] = useState({
-    id: '', name: '', category: '', stock: '', price: '', description: '', image: null
+    id: '', brand: '', model: '', size: '', price: '', description: ''
   });
 
   useEffect(() => {
@@ -33,38 +29,21 @@ const Products = () => {
   }, []);
 
   const resetFormData = () => setFormData({
-    id: '', name: '', category: '', stock: '', price: '', description: '', image: null
+    id: '', brand: '', model: '', size: '', price: '', description: ''
   });
-
-  const handleImageUpload = async (file) => {
-    const imageRef = ref(storage, `products/${Date.now()}_${file.name}`);
-    const snapshot = await uploadBytes(imageRef, file);
-    return await getDownloadURL(snapshot.ref);
-  };
 
   const handleFormSubmit = async (e) => {
     e.preventDefault();
 
+    const productData = {
+      brand: formData.brand,
+      model: formData.model,
+      size: formData.size,
+      price: parseFloat(formData.price),
+      description: formData.description
+    };
+
     try {
-      let imageUrl = '';
-
-      if (formData.image instanceof File) {
-        imageUrl = await handleImageUpload(formData.image);
-      } else if (formMode === 'edit') {
-        imageUrl = formData.image; // keep existing
-      }
-
-      const productData = {
-        name: formData.name,
-        category: formData.category,
-        stock: Number(formData.stock),
-        price: parseFloat(formData.price),
-        description: formData.description,
-        image: imageUrl,
-        weight: 'N/A',
-        dimensions: 'N/A'
-      };
-
       if (formMode === 'add') {
         const docRef = await addDoc(collection(db, 'products'), productData);
         setProducts(prev => [...prev, { ...productData, id: docRef.id }]);
@@ -82,20 +61,15 @@ const Products = () => {
     }
   };
 
-const handleAddProduct = () => {
-  console.log("Add Product clicked");
-  setFormMode('add');
-  resetFormData();
-  setIsFormModalOpen(true);
-};
-
+  const handleAddProduct = () => {
+    setFormMode('add');
+    resetFormData();
+    setIsFormModalOpen(true);
+  };
 
   const handleEditProduct = (product) => {
     setFormMode('edit');
-    setFormData({
-      ...product,
-      image: product.image || null
-    });
+    setFormData(product);
     setIsFormModalOpen(true);
   };
 
@@ -126,19 +100,9 @@ const handleAddProduct = () => {
   };
 
   const handleFormChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === 'image' && files.length > 0) {
-      setFormData(prev => ({ ...prev, image: files[0] }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: (name === 'stock' || name === 'price') ? Number(value) : value
-      }));
-    }
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
-
-  const getStockStatusClass = (stock) =>
-    stock > 20 ? 'stock-high' : stock > 5 ? 'stock-medium' : 'stock-low';
 
   return (
     <div className="products-page-container">
@@ -154,9 +118,9 @@ const handleAddProduct = () => {
             <table className="product-table">
               <thead>
                 <tr>
-                  <th>Product</th>
-                  <th>Category</th>
-                  <th>Stock</th>
+                  <th>Brand</th>
+                  <th>Model</th>
+                  <th>Size</th>
                   <th>Price</th>
                   <th>Actions</th>
                 </tr>
@@ -164,26 +128,18 @@ const handleAddProduct = () => {
               <tbody>
                 {products.map((product, index) => (
                   <tr key={product.id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                    <td>{product.brand}</td>
+                    <td>{product.model}</td>
+                    <td>{product.size}</td>
+                    <td>₱{parseFloat(product.price).toFixed(2)}</td>
                     <td>
-                      <img
-                        src={product.image}
-                        alt={product.name}
-                        className="product-image"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://placehold.co/100x100?text=No+Img';
-                        }}
-                      />
-                      {product.name}
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => handleViewDetails(product)}>View</button>
+                        <button onClick={() => handleEditProduct(product)}>Edit</button>
+                        <button onClick={() => handleDeleteProduct(product.id)}>Delete</button>
+                      </div>
                     </td>
-                    <td>{product.category}</td>
-                    <td><span className={getStockStatusClass(product.stock)}>{product.stock} in stock</span></td>
-                    <td>${product.price.toFixed(2)}</td>
-                    <td>
-                      <button onClick={() => handleViewDetails(product)}>View</button>
-                      <button onClick={() => handleEditProduct(product)}>Edit</button>
-                      <button onClick={() => handleDeleteProduct(product.id)}>Delete</button>
-                    </td>
+
                   </tr>
                 ))}
               </tbody>
@@ -195,15 +151,9 @@ const handleAddProduct = () => {
       {isModalOpen && selectedProduct && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h2>{selectedProduct.name}</h2>
-            <img
-              src={selectedProduct.image}
-              alt={selectedProduct.name}
-              className="modal-product-image"
-            />
-            <p><strong>Category:</strong> {selectedProduct.category}</p>
-            <p><strong>Stock:</strong> {selectedProduct.stock}</p>
-            <p><strong>Price:</strong> ${selectedProduct.price.toFixed(2)}</p>
+            <h2>{selectedProduct.brand} - {selectedProduct.model}</h2>
+            <p><strong>Size:</strong> {selectedProduct.size}</p>
+            <p><strong>Price:</strong> ₱{selectedProduct.price.toFixed(2)}</p>
             <p><strong>Description:</strong> {selectedProduct.description}</p>
             <button onClick={handleCloseModal}>Close</button>
           </div>
@@ -215,29 +165,17 @@ const handleAddProduct = () => {
           <div className="form-modal-content">
             <h2>{formMode === 'add' ? 'Add New Product' : 'Edit Product'}</h2>
             <form onSubmit={handleFormSubmit}>
-              <div className="form-group">
-                <label htmlFor="image">Product Photo:</label>
-                <input
-                  type="file"
-                  id="image"
-                  name="image"
-                  accept="image/*"
-                  onChange={handleFormChange}
-                  required={formMode === 'add'}
-                />
-              </div>
-              {['name', 'category', 'stock', 'price'].map((field) => (
+              {['brand', 'model', 'size', 'price'].map((field) => (
                 <div className="form-group" key={field}>
                   <label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}:</label>
                   <input
-                    type={field === 'stock' || field === 'price' ? 'number' : 'text'}
+                    type={field === 'price' ? 'number' : 'text'}
                     id={field}
                     name={field}
                     value={formData[field]}
                     onChange={handleFormChange}
                     required
-                    min={field === 'stock' ? "0" : undefined}
-                    step={field === 'price' ? "0.01" : undefined}
+                    step={field === 'price' ? '0.01' : undefined}
                   />
                 </div>
               ))}
