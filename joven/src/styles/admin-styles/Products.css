@@ -1,0 +1,115 @@
+/* ===================== PAGE ===================== */
+.products-page-container {
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.products-page-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.controls-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+/* ===================== BUTTONS ===================== */
+.add-product-button {
+  background-color: #007bff;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-product-button:hover {
+  background-color: #0056b3;
+}
+
+.delete-selected-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.delete-selected-button:hover {
+  background-color: #b82a35;
+}
+
+.no-products-message {
+  color: #666;
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* ===================== TABLE ===================== */
+.product-table-wrapper {
+  overflow-x: auto;
+}
+
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.product-table th, .product-table td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+/* Checkbox alignment */
+.product-table th:first-child,
+.product-table td:first-child {
+  width: 40px;
+  text-align: center;
+}
+
+/* ===================== ACTION BUTTONS ===================== */
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-buttons button {
+  padding: 0.3rem 0.6rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  background-color: #e0e0e0;
+}
+
+.action-buttons button:hover {
+  background-color: #cfcfcf;
+}
+
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-button:hover {
+  background-color: #b82a35;
+}
+

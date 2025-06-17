@@ -131,7 +131,7 @@ function App() {
             </RequireVerifiedEmail>
           }
         >
-          <Route index element={<AdminSales />} />
+          <Route path="admindashboard" element={<AdminDashboard />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="products" element={<AdminProducts />} />
