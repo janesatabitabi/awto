@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useEffect, useState } from 'react';
 import {
   BrowserRouter as Router,
@@ -16,7 +15,7 @@ import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 import ViewProduct from './components/ViewProduct';
 
-// Admin Layout & Pages
+// Admin Pages
 import AdminDashboard from './pages/admin-page/AdminDashboard';
 import AdminSales from './pages/admin-page/Sales';
 import AdminInventory from './pages/admin-page/Inventory';
@@ -30,11 +29,13 @@ import AdminSettings from './pages/admin-page/Settings';
 import UserDashboard from './pages/user-page/UserDashboard';
 import StaffDashboard from './pages/staff-page/StaffDashboard';
 
+// User Profile
+import UserProfile from './pages/user-page/UserProfile';
+
 // Auth Guards
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import RequireVerifiedEmail from './components/RequireVerifiedEmail';
 import Verify from './pages/Verify';
-
 
 // Spinner Component
 const Spinner = () => (
@@ -82,7 +83,6 @@ const ProtectedRoute = ({ role, children }) => {
   return granted ? children : null;
 };
 
-// Main App
 function App() {
   return (
     <Router>
@@ -108,7 +108,20 @@ function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
 
-       <Route
+        {/* ✅ User Profile Route (protected) */}
+        <Route
+          path="/profile"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="User">
+                <UserProfile />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
+
+        {/* Admin Dashboard and Subroutes */}
+        <Route
           path="/admin-dashboard"
           element={
             <RequireVerifiedEmail>
@@ -128,7 +141,7 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* User Dashboard with Email Verification */}
+        {/* User Dashboard */}
         <Route
           path="/user-dashboard"
           element={
@@ -140,7 +153,7 @@ function App() {
           }
         />
 
-        {/* Staff Dashboard with Email Verification */}
+        {/* Staff Dashboard */}
         <Route
           path="/staff-dashboard"
           element={
