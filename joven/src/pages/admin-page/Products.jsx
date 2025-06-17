@@ -1,9 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc, doc
 } from 'firebase/firestore';
-import '../../styles/AdminDashboard.css';
+import '../../styles/admin-styles/Products.css';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -74,13 +75,14 @@ const Products = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteDoc(doc(db, 'products', productId));
-        setProducts(products.filter(p => p.id !== productId));
-      } catch (error) {
-        console.error("Error deleting product:", error);
-      }
+    const confirmDelete = window.confirm('Are you sure you want to delete this product? This action cannot be undone.');
+    if (!confirmDelete) return;
+
+    try {
+      await deleteDoc(doc(db, 'products', productId));
+      setProducts(prev => prev.filter(p => p.id !== productId));
+    } catch (error) {
+      console.error("Error deleting product:", error);
     }
   };
 
@@ -126,20 +128,19 @@ const Products = () => {
                 </tr>
               </thead>
               <tbody>
-                {products.map((product, index) => (
-                  <tr key={product.id} className={index % 2 === 0 ? 'even-row' : 'odd-row'}>
+                {products.map((product) => (
+                  <tr key={product.id}>
                     <td>{product.brand}</td>
                     <td>{product.model}</td>
                     <td>{product.size}</td>
                     <td>₱{parseFloat(product.price).toFixed(2)}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      <div className="action-buttons">
                         <button onClick={() => handleViewDetails(product)}>View</button>
                         <button onClick={() => handleEditProduct(product)}>Edit</button>
-                        <button onClick={() => handleDeleteProduct(product.id)}>Delete</button>
+                        <button onClick={() => handleDeleteProduct(product.id)} className="delete-button">Delete</button>
                       </div>
                     </td>
-
                   </tr>
                 ))}
               </tbody>
@@ -148,6 +149,7 @@ const Products = () => {
         )}
       </div>
 
+      {/* View Modal */}
       {isModalOpen && selectedProduct && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -160,6 +162,7 @@ const Products = () => {
         </div>
       )}
 
+      {/* Add/Edit Form Modal */}
       {isFormModalOpen && (
         <div className="modal-overlay">
           <div className="form-modal-content">

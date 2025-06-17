@@ -1,0 +1,191 @@
+.sales-container {
+  padding: 2rem;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.sales-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.sales-header h1 {
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.sales-header button {
+  background-color: #2b6cb0;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.sales-header button:hover {
+  background-color: #2c5282;
+}
+
+/* ===================== TABLE ===================== */
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+}
+
+.sales-table th,
+.sales-table td {
+  border: 1px solid #ddd;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.sales-table th {
+  background-color: #f7fafc;
+  font-weight: 600;
+}
+
+/* ===================== MODAL ===================== */
+
+.sales-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Large form modal */
+.sales-form.large {
+  width: 90%;
+  max-width: 920px;
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sales-form h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* ===================== INPUTS ===================== */
+
+.sales-form input[type="text"],
+.sales-form input[type="number"] {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.search-section {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.search-section input {
+  flex: 1;
+}
+
+.search-section button {
+  background-color: #2b6cb0;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.search-section button:hover {
+  background-color: #2c5282;
+}
+
+/* ===================== SEARCH RESULTS ===================== */
+
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 1rem;
+  max-height: 280px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.product-result-card {
+  padding: 0.75rem;
+  border: 1px solid #aaa;
+  border-radius: 8px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.product-result-card:hover {
+  background-color: #ebf8ff;
+  transform: scale(1.01);
+}
+
+.product-result-card.selected {
+  background-color: #bee3f8;
+  border: 2px solid #3182ce;
+}
+
+/* ===================== BUTTONS ===================== */
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.form-buttons button {
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.form-buttons button:first-child {
+  background-color: #2b6cb0;
+  color: #fff;
+}
+
+.form-buttons button:first-child:hover {
+  background-color: #2c5282;
+}
+
+.cancel-btn {
+  background-color: #e2e8f0 !important;
+  color: #333 !important;
+}
+
+.cancel-btn:hover {
+  background-color: #cbd5e0 !important;
+}
