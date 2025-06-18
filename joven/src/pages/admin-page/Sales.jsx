@@ -1,9 +1,7 @@
-// Sales.jsx
 import React, { useState, useEffect } from 'react';
 import { db } from '../../firebase';
 import {
   collection,
-  getDocs,
   addDoc,
   updateDoc,
   doc,
@@ -32,7 +30,9 @@ const Sales = () => {
 
     const unsubSales = onSnapshot(collection(db, 'sales'), snapshot => {
       const logs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      const sorted = logs.sort((a, b) => b.createdAt?.seconds - a.createdAt?.seconds);
+      const sorted = logs.sort((a, b) =>
+        (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+      );
       setSalesLog(sorted);
     });
 
@@ -55,15 +55,16 @@ const Sales = () => {
       return;
     }
 
-    const total = selectedProduct.price * quantity;
+    const unitPrice = Number(selectedProduct.price);
+    const totalAmount = unitPrice * quantity;
 
     const saleData = {
       customerName,
       productId: selectedProduct.id,
       productName: `${selectedProduct.brand} ${selectedProduct.model}`,
       quantity,
-      unitPrice: selectedProduct.price,
-      totalAmount: total,
+      unitPrice,
+      totalAmount,
       createdAt: Timestamp.now(),
       type: 'in-store',
       status: 'completed',
@@ -75,7 +76,6 @@ const Sales = () => {
         stock: selectedProduct.stock - quantity,
       });
 
-      // reset form
       setCustomerName('');
       setSelectedProduct(null);
       setSearchTerm('');
@@ -117,10 +117,12 @@ const Sales = () => {
             </div>
 
             <div className="search-results-grid">
-              {filteredProducts.map(p => (
+              {filteredProducts.map((p) => (
                 <div
                   key={p.id}
-                  className={`product-result-card ${selectedProduct?.id === p.id ? 'selected' : ''}`}
+                  className={`product-result-card ${
+                    selectedProduct?.id === p.id ? 'selected' : ''
+                  }`}
                   onClick={() => setSelectedProduct(p)}
                 >
                   <strong>{p.brand} {p.model} {p.size}</strong>
@@ -157,16 +159,22 @@ const Sales = () => {
           </tr>
         </thead>
         <tbody>
-          {salesLog.map(log => (
-            <tr key={log.id}>
-              <td>{log.createdAt?.toDate().toLocaleDateString()}</td>
-              <td>{log.customerName}</td>
-              <td>{log.productName}</td>
-              <td>{log.quantity}</td>
-              <td>₱{log.unitPrice.toFixed(2)}</td>
-              <td>₱{log.totalAmount.toFixed(2)}</td>
+          {salesLog.length === 0 ? (
+            <tr>
+              <td colSpan="6" style={{ textAlign: 'center' }}>No sales yet.</td>
             </tr>
-          ))}
+          ) : (
+            salesLog.map((log) => (
+              <tr key={log.id}>
+                <td>{log.createdAt?.toDate().toLocaleDateString() || 'N/A'}</td>
+                <td>{log.customerName || 'N/A'}</td>
+                <td>{log.productName || 'N/A'}</td>
+                <td>{log.quantity || 0}</td>
+                <td>₱{Number(log.unitPrice || 0).toFixed(2)}</td>
+                <td>₱{Number(log.totalAmount || 0).toFixed(2)}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
     </div>
