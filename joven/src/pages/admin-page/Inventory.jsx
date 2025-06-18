@@ -1,3 +1,4 @@
+// src/pages/admin-dashboard/Inventory.jsx
 import React, { useEffect, useState } from 'react';
 import { db } from '../../firebase';
 import {
@@ -5,16 +6,17 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  serverTimestamp,
 } from 'firebase/firestore';
 import '../../styles/admin-styles/Inventory.css';
+import Restock from '../../components/admin-components/Restock';
 
 const Inventory = () => {
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortOption, setSortOption] = useState('name-asc');
+  const [sortOption, setSortOption] = useState('id-asc'); 
 
-  // Restock Modal State
   const [isRestockOpen, setIsRestockOpen] = useState(false);
   const [restockList, setRestockList] = useState([]);
   const [restockSearch, setRestockSearch] = useState('');
@@ -34,29 +36,39 @@ const Inventory = () => {
     let filtered = [...products];
 
     if (searchTerm.trim() !== '') {
-      const lowerTerm = searchTerm.toLowerCase();
-      filtered = filtered.filter((p) => {
-        const combined = `${p.brand} ${p.model} ${p.size}`.toLowerCase();
-        return combined.includes(lowerTerm);
-      });
+      const lower = searchTerm.toLowerCase();
+      filtered = filtered.filter((p) =>
+        `${p.productId} ${p.brand} ${p.model} ${p.size}`.toLowerCase().includes(lower)
+      );
     }
 
     switch (sortOption) {
-      case 'name-asc':
-        filtered.sort((a, b) =>
-          `${a.brand} ${a.model}`.localeCompare(`${b.brand} ${b.model}`)
-        );
+      case 'id-asc':
+        filtered.sort((a, b) => {
+          const idA = parseInt(a.productId) || 0;
+          const idB = parseInt(b.productId) || 0;
+          return idA - idB;
+        });
         break;
-      case 'name-desc':
-        filtered.sort((a, b) =>
-          `${b.brand} ${b.model}`.localeCompare(`${a.brand} ${a.model}`)
-        );
+      case 'id-desc':
+        filtered.sort((a, b) => {
+          const idA = parseInt(a.productId) || 0;
+          const idB = parseInt(b.productId) || 0;
+          return idB - idA;
+        });
         break;
       case 'stock-asc':
         filtered.sort((a, b) => Number(a.stock) - Number(b.stock));
         break;
       case 'stock-desc':
         filtered.sort((a, b) => Number(b.stock) - Number(a.stock));
+        break;
+      case 'modified-latest':
+        filtered.sort((a, b) => {
+          const aTime = a.dateModified?.toMillis?.() || 0;
+          const bTime = b.dateModified?.toMillis?.() || 0;
+          return bTime - aTime;
+        });
         break;
       default:
         break;
@@ -65,29 +77,31 @@ const Inventory = () => {
     setFilteredProducts(filtered);
   }, [products, searchTerm, sortOption]);
 
-  const handleRestockInput = (e, id) => {
-    const newQty = parseInt(e.target.value || 0);
-    setRestockList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, qty: newQty } : item))
-    );
-  };
-
   const openRestockModal = () => {
     setRestockList([]);
     setRestockSearch('');
     setIsRestockOpen(true);
   };
 
-  const handleSearchRestockProduct = () => {
-    const search = restockSearch.toLowerCase();
-    const found = products
-      .filter((p) => {
-        const fullName = `${p.brand} ${p.model} ${p.size}`.toLowerCase();
-        return fullName.includes(search);
-      })
-      .map((p) => ({ ...p, qty: 0 }));
+  const closeRestockModal = () => {
+    setIsRestockOpen(false);
+  };
 
-    setRestockList(found);
+  const handleSearchRestockProduct = () => {
+    const term = restockSearch.toLowerCase();
+    const result = products
+      .filter((p) =>
+        `${p.productId} ${p.brand} ${p.model} ${p.size}`.toLowerCase().includes(term)
+      )
+      .map((p) => ({ ...p, qty: 0 }));
+    setRestockList(result);
+  };
+
+  const handleRestockInput = (e, id) => {
+    const qty = parseInt(e.target.value || 0);
+    setRestockList((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, qty } : item))
+    );
   };
 
   const saveRestocks = async () => {
@@ -95,14 +109,19 @@ const Inventory = () => {
       for (const item of restockList) {
         if (item.qty > 0) {
           const ref = doc(db, 'products', item.id);
-          const current = products.find((p) => p.id === item.id);
-          const updatedStock = Number(current.stock || 0) + Number(item.qty);
-          await updateDoc(ref, { stock: updatedStock });
+          const original = products.find((p) => p.id === item.id);
+          const newStock = Number(original.stock || 0) + Number(item.qty);
+
+          await updateDoc(ref, {
+            stock: newStock,
+            dateModified: serverTimestamp(),
+          });
         }
       }
       setIsRestockOpen(false);
-    } catch (error) {
-      console.error('Error saving restocks:', error);
+    } catch (err) {
+      console.error('Restock failed:', err);
+      alert('Failed to save restocks.');
     }
   };
 
@@ -113,126 +132,87 @@ const Inventory = () => {
       <div className="inventory-controls">
         <input
           type="text"
-          placeholder="Search product..."
-          className="search-bar"
+          placeholder="Search by Product Name or ID..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-bar"
         />
-
         <select
-          className="sort-select"
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
+          className="sort-select"
         >
-          <option value="name-asc">Name A–Z</option>
-          <option value="name-desc">Name Z–A</option>
+          <option value="id-asc">Ascending Product ID</option>
+          <option value="id-desc">Descending Product ID</option>
           <option value="stock-asc">Stock Low to High</option>
           <option value="stock-desc">Stock High to Low</option>
+          <option value="modified-latest">Latest Modified</option>
         </select>
-
         <button onClick={openRestockModal} className="restock-btn">
           Restock
         </button>
       </div>
 
       <div className="inventory-card">
-        <div className="inventory-table-wrapper">
-          <table className="inventory-table">
-            <thead>
-              <tr>
-                <th>Product Name</th>
-                <th>Stocks</th>
-                <th>Unit Price</th>
-                <th>Total Price</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product, index) => {
-                  const productName = `${product.brand} ${product.model} ${product.size}`;
-                  const totalPrice = product.stock * product.price;
+        <table className="inventory-table">
+          <thead>
+            <tr>
+              <th>Product ID</th>
+              <th>Product Name</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Stock</th>
+              <th>Price</th>
+              <th>Total</th>
+              <th>Date Modified</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => {
+                const productName = `${product.brand} ${product.model} ${product.size}`;
+                const total = Number(product.stock || 0) * Number(product.price || 0);
+                const status = Number(product.stock) <= 4 ? 'Out of Stock' : 'In Stock';
+                const date = product.dateModified?.toDate?.().toLocaleString() || '—';
 
-                  return (
-                    <tr
-                      key={product.id}
-                      className={index % 2 === 0 ? 'even-row' : 'odd-row'}
-                    >
-                      <td>{productName}</td>
-                      <td>
-                        <div className="stock-cell">
-                          {product.stock}
-                          {Number(product.stock) < 4 && (
-                            <span className="low-stock-warning">Low Stock</span>
-                          )}
-                        </div>
-                      </td>
-                      <td>₱{Number(product.price).toFixed(2)}</td>
-                      <td className="text-green-600 font-semibold">
-                        ₱{Number(totalPrice).toFixed(2)}
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="4" className="text-center text-gray-500">
-                    No matching products.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                return (
+                  <tr key={product.id}>
+                    <td>{product.productId || product.id}</td>
+                    <td>{productName}</td>
+                    <td>{product.type || '—'}</td>
+                    <td className={status === 'Out of Stock' ? 'text-red' : 'text-green'}>
+                      {status}
+                    </td>
+                    <td>{product.stock}</td>
+                    <td>₱{Number(product.price).toFixed(2)}</td>
+                    <td>₱{total.toFixed(2)}</td>
+                    <td>{date}</td>
+                  </tr>
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan="8" className="text-center text-gray-500">
+                  No products found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
 
       {isRestockOpen && (
         <div className="modal-overlay">
-          <div className="modal">
-            <h2>Restock Products</h2>
-            <input
-              type="text"
-              placeholder="Search product to restock..."
-              className="search-bar"
-              value={restockSearch}
-              onChange={(e) => setRestockSearch(e.target.value)}
+          <div className="modal-content">
+            <Restock
+              searchValue={restockSearch}
+              setSearchValue={setRestockSearch}
+              onSearch={handleSearchRestockProduct}
+              restockList={restockList}
+              onChangeQty={handleRestockInput}
+              onClose={closeRestockModal}
+              onSave={saveRestocks}
             />
-            <button onClick={handleSearchRestockProduct} className="search-btn">
-              Search
-            </button>
-
-            <div className="restock-table-wrapper">
-              <table className="inventory-table">
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Add Qty</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {restockList.map((item) => (
-                    <tr key={item.id}>
-                      <td>{`${item.brand} ${item.model} ${item.size}`}</td>
-                      <td>
-                        <input
-                          type="number"
-                          min="0"
-                          value={item.qty}
-                          onChange={(e) => handleRestockInput(e, item.id)}
-                          className="stock-input"
-                        />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="modal-actions">
-              <button onClick={() => setIsRestockOpen(false)}>Cancel</button>
-              <button onClick={saveRestocks} className="save-btn">
-                Save Changes
-              </button>
-            </div>
           </div>
         </div>
       )}
