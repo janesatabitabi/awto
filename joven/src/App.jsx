@@ -5,6 +5,7 @@ import {
   Route,
   useNavigate,
   Navigate,
+  useLocation,
 } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -83,6 +84,12 @@ const ProtectedRoute = ({ role, children }) => {
   return granted ? children : null;
 };
 
+// ✅ Helper wrapper to pass pathname as origin
+const WithOrigin = ({ children }) => {
+  const location = useLocation();
+  return React.cloneElement(children, { origin: location.pathname });
+};
+
 function App() {
   return (
     <Router>
@@ -92,17 +99,21 @@ function App() {
         <Route
           path="/login"
           element={
-            <RedirectIfAuthenticated>
-              <LandingPage />
-            </RedirectIfAuthenticated>
+            <WithOrigin>
+              <RedirectIfAuthenticated>
+                <LandingPage />
+              </RedirectIfAuthenticated>
+            </WithOrigin>
           }
         />
         <Route
           path="/register"
           element={
-            <RedirectIfAuthenticated>
-              <Register />
-            </RedirectIfAuthenticated>
+            <WithOrigin>
+              <RedirectIfAuthenticated>
+                <Register />
+              </RedirectIfAuthenticated>
+            </WithOrigin>
           }
         />
         <Route path="/verify" element={<Verify />} />

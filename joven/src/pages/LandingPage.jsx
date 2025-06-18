@@ -3,19 +3,20 @@ import '../styles/LandingPage.css';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import LoginSection from '../components/LoginSection';
+import Fitment from '../components/Fitment'; // ✅ Separated Fitment component
 
 const LandingPage = () => {
-  const [user, setUser] = useState(null); // 🔐 Logged in user
-  const [showLogin, setShowLogin] = useState(false); // 🔓 Show/hide login popup
+  const [user, setUser] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
 
   const handleLoginSuccess = (userData) => {
-    setUser(userData); // Save user data
-    setShowLogin(false); // Close modal
+    setUser(userData);
+    setShowLogin(false);
   };
 
   return (
     <>
-      <Navbar user={user} onLoginClick={() => setShowLogin(true)} /> {/* ✅ Pass user */}
+      <Navbar user={user} onLoginClick={() => setShowLogin(true)} />
       {showLogin && (
         <LoginSection
           onClose={() => setShowLogin(false)}
@@ -24,24 +25,8 @@ const LandingPage = () => {
       )}
 
       <main className="main-content">
-        {/* Fitment */}
-        <section id="fitment" className="section fitment-section">
-          <div className="fitment-overlay">
-            <div className="fitment-heading">
-              <h2 className="fitment-subtitle">DISCOVER THE IDEAL FIT FOR YOUR RIDE</h2>
-              <h1 className="fitment-title">Fitment Selection Tool</h1>
-              <p className="fitment-description">Tires, Wheels, Suspension & More</p>
-            </div>
-            <div className="fitment-form">
-              <select className="fitment-select"><option>Year</option><option>2024</option><option>2023</option></select>
-              <select className="fitment-select"><option>Make</option><option>Toyota</option><option>Honda</option></select>
-              <select className="fitment-select"><option>Model</option><option>Camry</option><option>Civic</option></select>
-              <select className="fitment-select"><option>Trim</option><option>LE</option><option>EX</option></select>
-              <select className="fitment-select"><option>Drive</option><option>FWD</option><option>AWD</option></select>
-              <button className="fitment-button">Show Results</button>
-            </div>
-          </div>
-        </section>
+        {/* ✅ Fitment now imported and separated */}
+        <Fitment />
 
         {/* Brands */}
         <section id="brand" className="section brand-section">

@@ -1,27 +1,37 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import { FaBars } from 'react-icons/fa';
 import { FiBell, FiShoppingCart } from 'react-icons/fi';
 import jovenLogo from '../assets/jovenlogo.png';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
+import { doc, getDoc } from 'firebase/firestore';
 import '../styles/Navbar.css';
 import LoginSection from './LoginSection';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showLogin, setShowLogin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   const dropdownRef = useRef(null);
-  const notificationCount = 3; // Replace with dynamic value from Firestore if needed
-  const cartCount = 2; // Replace with dynamic cart count
+  const notificationCount = 3; // Placeholder
+  const cartCount = 2; // Placeholder
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        const docRef = doc(db, 'users', currentUser.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        }
+      }
     });
 
     return () => unsubscribe();
@@ -33,7 +43,6 @@ const Navbar = () => {
         setShowDropdown(false);
       }
     };
-
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
@@ -41,12 +50,19 @@ const Navbar = () => {
   const handleLogout = async () => {
     await signOut(auth);
     setShowDropdown(false);
+    setUserData(null);
     navigate('/');
   };
 
   const goToProfileTab = (tab) => {
     setShowDropdown(false);
     navigate(`/profile?tab=${tab}`);
+  };
+
+  const handleLoginSuccess = (userData) => {
+    setUserData(userData);
+    setShowLogin(false);
+    // 👇 Navigation is handled inside LoginSection now
   };
 
   return (
@@ -81,10 +97,7 @@ const Navbar = () => {
 
           {user ? (
             <div className="profile-dropdown" ref={dropdownRef}>
-              <button
-                className="profile-info"
-                onClick={() => setShowDropdown((prev) => !prev)}
-              >
+              <button className="profile-info" onClick={() => setShowDropdown((prev) => !prev)}>
                 {user.displayName || user.email}
               </button>
               {showDropdown && (
@@ -125,7 +138,11 @@ const Navbar = () => {
         <div className="login-popup-overlay" onClick={() => setShowLogin(false)}>
           <div className="login-popup" onClick={(e) => e.stopPropagation()}>
             <button className="close-popup" onClick={() => setShowLogin(false)}>✖</button>
-            <LoginSection onClose={() => setShowLogin(false)} />
+            <LoginSection
+              onClose={() => setShowLogin(false)}
+              onLoginSuccess={handleLoginSuccess}
+              origin={location.pathname} // ✅ pass origin
+            />
           </div>
         </div>
       )}

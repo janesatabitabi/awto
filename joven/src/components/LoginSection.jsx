@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
-const LoginSection = ({ onClose, onLoginSuccess }) => {
+const LoginSection = ({ onClose, origin }) => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -39,12 +40,26 @@ const LoginSection = ({ onClose, onLoginSuccess }) => {
 
       const userData = userSnap.data();
 
+      // Store locally for OTP or other features
       localStorage.setItem('isOTPVerified', 'true');
-      localStorage.setItem('userData', JSON.stringify(userData)); // Optional
+      localStorage.setItem('userData', JSON.stringify(userData));
 
-      if (onLoginSuccess) onLoginSuccess(userData); // 🔥 Send user data to parent
-      if (onClose) onClose(); // 🔒 Close login modal
+      // 🧠 Redirect based on role and origin
+      if (!user.emailVerified) {
+        navigate('/verify');
+      } else if (userData.role === 'Admin') {
+        navigate('/admin-dashboard');
+      } else {
+        // 👇 Force '/' if logging in from '/register'
+        if (origin === '/register') {
+          navigate('/');
+        } else {
+          // You may customize this to remember last location later
+          navigate('/');
+        }
+      }
 
+      if (onClose) onClose();
     } catch (err) {
       console.error(err);
       setError('Invalid email or password.');

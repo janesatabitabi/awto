@@ -6,7 +6,7 @@ import { onAuthStateChanged } from 'firebase/auth';
 import { auth, db } from '../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
-const RedirectIfAuthenticated = ({ children }) => {
+const RedirectIfAuthenticated = ({ children, origin }) => {
   const [checking, setChecking] = useState(true);
   const [redirectTo, setRedirectTo] = useState(null);
 
@@ -28,11 +28,16 @@ const RedirectIfAuthenticated = ({ children }) => {
             case 'Admin':
               setRedirectTo('/admin-dashboard');
               break;
-            case 'User':
-              setRedirectTo('/user-dashboard');
-              break;
             case 'Staff':
               setRedirectTo('/staff-dashboard');
+              break;
+            case 'User':
+              // 🔥 Smart redirection for user role
+              if (origin === '/register') {
+                setRedirectTo('/');
+              } else {
+                setRedirectTo('/user-dashboard');
+              }
               break;
             default:
               setRedirectTo('/');
@@ -46,9 +51,9 @@ const RedirectIfAuthenticated = ({ children }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [origin]);
 
-  if (checking) return <div>Checking authentication...</div>;
+  if (checking) return null; // Can replace with a spinner if needed
   if (redirectTo) return <Navigate to={redirectTo} replace />;
   return children;
 };
