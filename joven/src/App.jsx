@@ -26,12 +26,13 @@ import AdminReservations from './pages/admin-page/Reservations';
 import AdminCustomers from './pages/admin-page/Customers';
 import AdminSettings from './pages/admin-page/Settings';
 
-// User & Staff Dashboards
+// User Pages
 import UserDashboard from './pages/user-page/UserDashboard';
-import StaffDashboard from './pages/staff-page/StaffDashboard';
-
-// User Profile
 import UserProfile from './pages/user-page/UserProfile';
+
+// Staff Pages
+import StaffDashboard from './pages/staff-page/StaffDashboard';
+import StaffInventory from './pages/staff-page/StaffInventory';
 
 // Auth Guards
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
@@ -59,8 +60,15 @@ const ProtectedRoute = ({ role, children }) => {
       }
 
       try {
-        const ref = doc(db, 'users', user.uid);
-        const snap = await getDoc(ref);
+        // Try admin
+        let ref = doc(db, 'users', user.uid);
+        let snap = await getDoc(ref);
+
+        // If not found in users, try staff
+        if (!snap.exists()) {
+          ref = doc(db, 'staff', user.uid);
+          snap = await getDoc(ref);
+        }
 
         if (snap.exists()) {
           const { role: userRole } = snap.data();
@@ -69,6 +77,8 @@ const ProtectedRoute = ({ role, children }) => {
           } else {
             navigate('/');
           }
+        } else {
+          navigate('/');
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -119,7 +129,7 @@ function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
 
-        {/* ✅ User Profile Route (protected) */}
+        {/* User Profile Route */}
         <Route
           path="/profile"
           element={
@@ -164,7 +174,7 @@ function App() {
           }
         />
 
-        {/* Staff Dashboard */}
+        {/* Staff Dashboard & Pages */}
         <Route
           path="/staff-dashboard"
           element={
@@ -175,6 +185,17 @@ function App() {
             </RequireVerifiedEmail>
           }
         />
+        <Route
+          path="/staff-inventory"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="Staff">
+                <StaffInventory />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
+
       </Routes>
     </Router>
   );
