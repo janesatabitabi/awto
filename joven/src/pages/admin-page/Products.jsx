@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../../firebase';
+import { db, auth } from '../../firebase';
 import {
   collection,
   getDocs,
@@ -22,6 +22,7 @@ const Products = () => {
     price: '',
     size: '',
     description: '',
+    type: 'Tire'
   });
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [viewProduct, setViewProduct] = useState(null);
@@ -30,7 +31,13 @@ const Products = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [nextProductId, setNextProductId] = useState(null);
+  const [nextProductId, setNextProductId] = useState('');
+
+  const PRODUCT_TYPE_PREFIXES = {
+    Tire: 'TI',
+    Mags: 'MA',
+    Accessories: 'AC'
+  };
 
   const fetchProducts = async () => {
     const querySnapshot = await getDocs(collection(db, 'products'));
@@ -42,62 +49,80 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-  const fetchNextProductId = async () => {
-    const counterRef = doc(db, 'metadata', 'productCounter');
-    const counterSnap = await getDoc(counterRef);
-    if (counterSnap.exists()) {
-      setNextProductId(counterSnap.data().current + 1);
-    } else {
-      setNextProductId(1);
+const fetchNextProductId = async (type = formData.type) => {
+  const prefix = PRODUCT_TYPE_PREFIXES[type];
+  const counterRef = doc(db, 'counters', `productCounter_${prefix}`);
+  const counterSnap = await getDoc(counterRef);
+
+  const current = (counterSnap.exists() && typeof counterSnap.data().lastId === 'number') 
+    ? counterSnap.data().lastId 
+    : 0;
+
+  const padded = String(current + 1).padStart(5, '0');
+  const id = `${prefix}-${padded}`;
+  setNextProductId(id);
+  return id;
+};
+
+
+  const handleInputChange = async (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // If type changes, fetch new Product ID
+    if (name === 'type' && !isEditMode) {
+      await fetchNextProductId(value);
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const verifyAdminAccess = async () => {
+    const user = auth.currentUser;
+    if (!user) return false;
 
-  const verifyAdminPassword = async () => {
-    const input = prompt('To confirm, enter the admin password:');
-    if (!input) return false;
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
 
-    const adminRef = doc(db, 'settings', 'admin');
-    const adminSnap = await getDoc(adminRef);
-
-    if (adminSnap.exists()) {
-      const storedPassword = adminSnap.data().password;
-      return input === storedPassword;
+    if (userSnap.exists() && userSnap.data().role === 'Admin') {
+      return true;
     } else {
-      alert("Admin password not found in Firestore.");
+      alert('You are not authorized to perform this action.');
       return false;
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (isEditMode && selectedProduct) {
-      await updateDoc(doc(db, 'products', selectedProduct.id), formData);
-    } else {
-      const counterRef = doc(db, 'metadata', 'productCounter');
-      const counterSnap = await getDoc(counterRef);
-      let newId = 1;
-      if (counterSnap.exists()) {
-        newId = counterSnap.data().current + 1;
-      }
+  const prefix = PRODUCT_TYPE_PREFIXES[formData.type];
+  const counterRef = doc(db, 'counters', `productCounter_${prefix}`);
+  const counterSnap = await getDoc(counterRef);
 
-      await addDoc(collection(db, 'products'), {
-        ...formData,
-        productId: newId,
-        createdAt: serverTimestamp(),
-      });
+  const current = (counterSnap.exists() && typeof counterSnap.data().lastId === 'number') 
+    ? counterSnap.data().lastId 
+    : 0;
 
-      await setDoc(counterRef, { current: newId });
-    }
+  const padded = String(current + 1).padStart(5, '0');
+  const generatedId = `${prefix}-${padded}`;
 
-    setIsModalOpen(false);
-    fetchProducts();
-  };
+  if (isEditMode && selectedProduct) {
+    await updateDoc(doc(db, 'products', selectedProduct.id), {
+      ...formData,
+      productId: selectedProduct.productId
+    });
+  } else {
+    await addDoc(collection(db, 'products'), {
+      ...formData,
+      productId: generatedId,
+      createdAt: serverTimestamp(),
+    });
+
+    await setDoc(counterRef, { lastId: current + 1 });
+  }
+
+  setIsModalOpen(false);
+  fetchProducts();
+};
+
 
   const handleEdit = (product) => {
     setSelectedProduct(product);
@@ -107,6 +132,7 @@ const Products = () => {
       price: product.price,
       size: product.size,
       description: product.description,
+      type: product.type
     });
     setNextProductId(product.productId || 'N/A');
     setIsEditMode(true);
@@ -114,21 +140,16 @@ const Products = () => {
   };
 
   const handleDelete = async (id) => {
-    const confirmed = await verifyAdminPassword();
+    const confirmed = await verifyAdminAccess();
     if (confirmed) {
       await deleteDoc(doc(db, 'products', id));
       fetchProducts();
-    } else {
-      alert('Incorrect password. Deletion cancelled.');
     }
   };
 
   const handleBulkDelete = async () => {
-    const confirmed = await verifyAdminPassword();
-    if (!confirmed) {
-      alert('Incorrect password. Bulk deletion cancelled.');
-      return;
-    }
+    const confirmed = await verifyAdminAccess();
+    if (!confirmed) return;
     for (const id of selectedProducts) {
       await deleteDoc(doc(db, 'products', id));
     }
@@ -170,19 +191,16 @@ const Products = () => {
         />
         <button
           className="add-product-button"
-          onClick={() => {
+          onClick={async () => {
             setIsEditMode(false);
-            setFormData({ brand: '', model: '', price: '', size: '', description: '' });
-            fetchNextProductId();
-            setIsModalOpen(true);
+            setFormData({ brand: '', model: '', price: '', size: '', description: '', type: 'Tire' });
+            await fetchNextProductId('Tire'); // wait for ID
+            setIsModalOpen(true); // only open modal when ID is ready
           }}
         >
           Add New Product
         </button>
-        <button
-          className="add-product-button"
-          onClick={() => setShowResetModal(true)}
-        >
+        <button className="add-product-button" onClick={() => setShowResetModal(true)}>
           Reset Product ID Counter
         </button>
         {selectedProducts.length > 0 && (
@@ -206,10 +224,12 @@ const Products = () => {
                     onChange={handleSelectAll}
                   />
                 </th>
+                <th>Product ID</th>
+                <th>Type</th>
                 <th>Brand</th>
                 <th>Model</th>
-                <th>Price</th>
                 <th>Size</th>
+                <th>Price</th>
                 <th>Description</th>
                 <th>Actions</th>
               </tr>
@@ -224,10 +244,12 @@ const Products = () => {
                       onChange={() => toggleProductSelection(product.id)}
                     />
                   </td>
+                  <td>{product.productId}</td>
+                  <td>{product.type}</td>
                   <td>{product.brand}</td>
                   <td>{product.model}</td>
-                  <td>{product.price}</td>
                   <td>{product.size}</td>
+                  <td>{product.price}</td>
                   <td>{product.description}</td>
                   <td className="action-buttons">
                     <button onClick={() => setViewProduct(product)}>View</button>
@@ -248,7 +270,15 @@ const Products = () => {
             <form onSubmit={handleSubmit}>
               <div className="form-group">
                 <label>Product ID</label>
-                <input type="text" value={nextProductId ?? 'Loading...'} readOnly />
+                <input type="text" value={nextProductId || 'Loading...'} readOnly />
+              </div>
+              <div className="form-group">
+                <label>Type</label>
+                <select name="type" value={formData.type} onChange={handleInputChange} required>
+                  <option value="Tire">Tire</option>
+                  <option value="Mags">Mags</option>
+                  <option value="Accessories">Accessories</option>
+                </select>
               </div>
               <div className="form-group">
                 <label>Brand</label>
@@ -259,12 +289,12 @@ const Products = () => {
                 <input type="text" name="model" value={formData.model} onChange={handleInputChange} required />
               </div>
               <div className="form-group">
-                <label>Price</label>
-                <input type="number" name="price" value={formData.price} onChange={handleInputChange} required />
-              </div>
-              <div className="form-group">
                 <label>Size</label>
                 <input type="text" name="size" value={formData.size} onChange={handleInputChange} required />
+              </div>
+              <div className="form-group">
+                <label>Price</label>
+                <input type="number" name="price" value={formData.price} onChange={handleInputChange} required />
               </div>
               <div className="form-group">
                 <label>Description</label>
@@ -284,6 +314,7 @@ const Products = () => {
           <div className="modal-content">
             <h2>Product Details</h2>
             <p><strong>Product ID:</strong> {viewProduct.productId}</p>
+            <p><strong>Type:</strong> {viewProduct.type}</p>
             <p><strong>Brand:</strong> {viewProduct.brand}</p>
             <p><strong>Model:</strong> {viewProduct.model}</p>
             <p><strong>Price:</strong> {viewProduct.price}</p>
