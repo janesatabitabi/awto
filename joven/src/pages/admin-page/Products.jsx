@@ -32,6 +32,8 @@ const Products = () => {
   const [showResetModal, setShowResetModal] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [nextProductId, setNextProductId] = useState('');
+  const [sortField, setSortField] = useState('productId');
+  const [sortOrder, setSortOrder] = useState('asc');
 
   const PRODUCT_TYPE_PREFIXES = {
     Tire: 'TI',
@@ -49,27 +51,25 @@ const Products = () => {
     fetchProducts();
   }, []);
 
-const fetchNextProductId = async (type = formData.type) => {
-  const prefix = PRODUCT_TYPE_PREFIXES[type];
-  const counterRef = doc(db, 'counters', `productCounter_${prefix}`);
-  const counterSnap = await getDoc(counterRef);
+  const fetchNextProductId = async (type = formData.type) => {
+    const prefix = PRODUCT_TYPE_PREFIXES[type];
+    const counterRef = doc(db, 'counters', `productCounter_${prefix}`);
+    const counterSnap = await getDoc(counterRef);
 
-  const current = (counterSnap.exists() && typeof counterSnap.data().lastId === 'number') 
-    ? counterSnap.data().lastId 
-    : 0;
+    const current = (counterSnap.exists() && typeof counterSnap.data().lastId === 'number') 
+      ? counterSnap.data().lastId 
+      : 0;
 
-  const padded = String(current + 1).padStart(5, '0');
-  const id = `${prefix}-${padded}`;
-  setNextProductId(id);
-  return id;
-};
-
+    const padded = String(current + 1).padStart(5, '0');
+    const id = `${prefix}-${padded}`;
+    setNextProductId(id);
+    return id;
+  };
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    // If type changes, fetch new Product ID
     if (name === 'type' && !isEditMode) {
       await fetchNextProductId(value);
     }
@@ -90,39 +90,38 @@ const fetchNextProductId = async (type = formData.type) => {
     }
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const prefix = PRODUCT_TYPE_PREFIXES[formData.type];
-  const counterRef = doc(db, 'counters', `productCounter_${prefix}`);
-  const counterSnap = await getDoc(counterRef);
+    const prefix = PRODUCT_TYPE_PREFIXES[formData.type];
+    const counterRef = doc(db, 'counters', `productCounter_${prefix}`);
+    const counterSnap = await getDoc(counterRef);
 
-  const current = (counterSnap.exists() && typeof counterSnap.data().lastId === 'number') 
-    ? counterSnap.data().lastId 
-    : 0;
+    const current = (counterSnap.exists() && typeof counterSnap.data().lastId === 'number') 
+      ? counterSnap.data().lastId 
+      : 0;
 
-  const padded = String(current + 1).padStart(5, '0');
-  const generatedId = `${prefix}-${padded}`;
+    const padded = String(current + 1).padStart(5, '0');
+    const generatedId = `${prefix}-${padded}`;
 
-  if (isEditMode && selectedProduct) {
-    await updateDoc(doc(db, 'products', selectedProduct.id), {
-      ...formData,
-      productId: selectedProduct.productId
-    });
-  } else {
-    await addDoc(collection(db, 'products'), {
-      ...formData,
-      productId: generatedId,
-      createdAt: serverTimestamp(),
-    });
+    if (isEditMode && selectedProduct) {
+      await updateDoc(doc(db, 'products', selectedProduct.id), {
+        ...formData,
+        productId: selectedProduct.productId
+      });
+    } else {
+      await addDoc(collection(db, 'products'), {
+        ...formData,
+        productId: generatedId,
+        createdAt: serverTimestamp(),
+      });
 
-    await setDoc(counterRef, { lastId: current + 1 });
-  }
+      await setDoc(counterRef, { lastId: current + 1 });
+    }
 
-  setIsModalOpen(false);
-  fetchProducts();
-};
-
+    setIsModalOpen(false);
+    fetchProducts();
+  };
 
   const handleEdit = (product) => {
     setSelectedProduct(product);
@@ -172,7 +171,31 @@ const handleSubmit = async (e) => {
     }
   };
 
-  const filteredProducts = products.filter((product) => {
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+
+  const sortedProducts = [...products].sort((a, b) => {
+    let valA = a[sortField]?.toString().toLowerCase();
+    let valB = b[sortField]?.toString().toLowerCase();
+
+    if (!valA || !valB) return 0;
+    if (!isNaN(valA) && !isNaN(valB)) {
+      valA = parseFloat(valA);
+      valB = parseFloat(valB);
+    }
+
+    if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+    if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const filteredProducts = sortedProducts.filter((product) => {
     return (
       product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.model.toLowerCase().includes(searchTerm.toLowerCase())
@@ -188,14 +211,15 @@ const handleSubmit = async (e) => {
           placeholder="Search..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
         />
         <button
           className="add-product-button"
           onClick={async () => {
             setIsEditMode(false);
             setFormData({ brand: '', model: '', price: '', size: '', description: '', type: 'Tire' });
-            await fetchNextProductId('Tire'); // wait for ID
-            setIsModalOpen(true); // only open modal when ID is ready
+            await fetchNextProductId('Tire');
+            setIsModalOpen(true);
           }}
         >
           Add New Product
@@ -224,13 +248,12 @@ const handleSubmit = async (e) => {
                     onChange={handleSelectAll}
                   />
                 </th>
-                <th>Product ID</th>
-                <th>Type</th>
-                <th>Brand</th>
-                <th>Model</th>
-                <th>Size</th>
-                <th>Price</th>
-                <th>Description</th>
+                {['productId', 'type', 'brand', 'model', 'size', 'price', 'description'].map((field) => (
+                  <th key={field} onClick={() => handleSort(field)} style={{ cursor: 'pointer' }}>
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                    {sortField === field ? (sortOrder === 'asc' ? ' ↑' : ' ↓') : ''}
+                  </th>
+                ))}
                 <th>Actions</th>
               </tr>
             </thead>

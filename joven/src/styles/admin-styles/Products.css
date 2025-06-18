@@ -212,3 +212,20 @@
 .form-actions button[type="button"]:hover {
   background-color: #5a6268;
 }
+
+.search-input {
+  flex: 1;
+  max-width: 400px;
+  padding: 0.6rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.2s ease;
+  margin-right: 1rem;
+}
+
+.search-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+  outline: none;
+}
