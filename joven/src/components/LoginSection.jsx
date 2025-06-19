@@ -59,7 +59,7 @@ const LoginSection = ({ onClose, origin }) => {
       } else if (userData.role === 'Admin') {
         navigate('/admin-dashboard');
       } else if (userData.role === 'User') {
-        navigate('/user-dashboard');
+        navigate('/');
       } else if (userData.role === 'Staff') {
         navigate('/staff-dashboard');
       } else {
