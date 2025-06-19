@@ -36,6 +36,7 @@ import ReservationPage from './components/ReservationPage';
 // Staff Pages
 import StaffDashboard from './pages/staff-page/StaffDashboard';
 import StaffInventory from './pages/staff-page/StaffInventory';
+import StaffSales from './pages/staff-page/StaffSales';
 
 // Auth Guards
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
@@ -199,6 +200,16 @@ export default function App() {
             <RequireVerifiedEmail>
               <ProtectedRoute role="Staff">
                 <StaffInventory />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
+        <Route
+          path="/staff-sales"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="Staff">
+                <StaffSales />
               </ProtectedRoute>
             </RequireVerifiedEmail>
           }
