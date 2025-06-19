@@ -1,0 +1,104 @@
+/* src/styles/admin-styles/Staff.css */
+
+.staff-container {
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.staff-header h2 {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.staff-content {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.staff-form-section,
+.staff-list-section {
+  flex: 1 1 300px;
+  background: #ffffff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.staff-form h3,
+.staff-list-section h3 {
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  color: #111827;
+}
+
+.staff-form input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+}
+
+.staff-form button {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.staff-form button:hover {
+  background-color: #1d4ed8;
+}
+
+.no-staff {
+  font-style: italic;
+  color: #6b7280;
+}
+
+.staff-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.staff-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.staff-avatar {
+  width: 40px;
+  height: 40px;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.staff-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.staff-info strong {
+  color: #111827;
+}
+
+.staff-info small {
+  color: #6b7280;
+}

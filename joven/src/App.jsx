@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   useNavigate,
-  Navigate,
   useLocation,
 } from 'react-router-dom';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -15,6 +14,7 @@ import { auth, db } from './firebase';
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 import ViewProduct from './components/ViewProduct';
+import Verify from './pages/Verify';
 
 // Admin Pages
 import AdminDashboard from './pages/admin-page/AdminDashboard';
@@ -37,16 +37,15 @@ import StaffInventory from './pages/staff-page/StaffInventory';
 // Auth Guards
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import RequireVerifiedEmail from './components/RequireVerifiedEmail';
-import Verify from './pages/Verify';
 
-// Spinner Component
+// Spinner UI
 const Spinner = () => (
   <div className="flex justify-center items-center h-screen">
     <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500 border-solid"></div>
   </div>
 );
 
-// Protected Route Component
+// ProtectedRoute: ensures auth, email verification, and correct role
 const ProtectedRoute = ({ role, children }) => {
   const [loading, setLoading] = useState(true);
   const [granted, setGranted] = useState(false);
@@ -60,28 +59,33 @@ const ProtectedRoute = ({ role, children }) => {
       }
 
       try {
-        // Try admin
-        let ref = doc(db, 'users', user.uid);
-        let snap = await getDoc(ref);
+        const userId = user.uid;
 
-        // If not found in users, try staff
-        if (!snap.exists()) {
-          ref = doc(db, 'staff', user.uid);
-          snap = await getDoc(ref);
+        // Check if the user exists in 'users' or 'staff'
+        const userRef = doc(db, 'users', userId);
+        const staffRef = doc(db, 'staff', userId);
+
+        const [userSnap, staffSnap] = await Promise.all([
+          getDoc(userRef),
+          getDoc(staffRef),
+        ]);
+
+        const data = userSnap.exists() ? userSnap.data() : staffSnap.exists() ? staffSnap.data() : null;
+
+        if (!data) {
+          navigate('/');
+          return;
         }
 
-        if (snap.exists()) {
-          const { role: userRole } = snap.data();
-          if (userRole === role) {
-            setGranted(true);
-          } else {
-            navigate('/');
-          }
+        // Match role
+        if (data.role === role) {
+          setGranted(true);
         } else {
           navigate('/');
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
+      } catch (err) {
+        console.error('Authorization error:', err);
+        navigate('/');
       }
 
       setLoading(false);
@@ -94,13 +98,13 @@ const ProtectedRoute = ({ role, children }) => {
   return granted ? children : null;
 };
 
-// ✅ Helper wrapper to pass pathname as origin
+// Wrapper to track origin path
 const WithOrigin = ({ children }) => {
   const location = useLocation();
   return React.cloneElement(children, { origin: location.pathname });
 };
 
-function App() {
+export default function App() {
   return (
     <Router>
       <Routes>
@@ -129,7 +133,7 @@ function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
 
-        {/* User Profile Route */}
+        {/* User Routes */}
         <Route
           path="/profile"
           element={
@@ -140,8 +144,18 @@ function App() {
             </RequireVerifiedEmail>
           }
         />
+        <Route
+          path="/user-dashboard"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="User">
+                <UserDashboard />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
 
-        {/* Admin Dashboard and Subroutes */}
+        {/* Admin Routes */}
         <Route
           path="/admin-dashboard"
           element={
@@ -162,19 +176,7 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* User Dashboard */}
-        <Route
-          path="/user-dashboard"
-          element={
-            <RequireVerifiedEmail>
-              <ProtectedRoute role="User">
-                <UserDashboard />
-              </ProtectedRoute>
-            </RequireVerifiedEmail>
-          }
-        />
-
-        {/* Staff Dashboard & Pages */}
+        {/* Staff Routes */}
         <Route
           path="/staff-dashboard"
           element={
@@ -195,10 +197,7 @@ function App() {
             </RequireVerifiedEmail>
           }
         />
-
       </Routes>
     </Router>
   );
 }
-
-export default App;
