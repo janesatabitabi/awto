@@ -1,12 +1,17 @@
-/* =================== RESERVATION PAGE =================== */
+/* ReservationPage.css */
 .reservation-page {
   padding: 2rem;
   font-family: 'Segoe UI', sans-serif;
-  background-color: #f4f6f8;
+  background: linear-gradient(to right, #f8f9fa, #e9ecef);
   min-height: 100vh;
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-/* Back Button */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .back-button {
   background: none;
   border: none;
@@ -21,104 +26,93 @@
   text-decoration: underline;
 }
 
-/* Form Card */
 .reservation-form {
   max-width: 600px;
   margin: 0 auto;
-  background: #ffffff;
+  background: #fff;
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  animation: slideIn 0.4s ease-in-out;
 }
 
-/* Section Title */
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 .reservation-page h2 {
   text-align: center;
-  color: #222;
+  color: #2d3436;
   font-size: 1.75rem;
   margin-bottom: 1.5rem;
 }
 
-/* Labels */
 .reservation-form label {
   font-weight: 600;
   font-size: 0.95rem;
-  margin-bottom: 0.3rem;
-  color: #333;
+  color: #2d3436;
 }
 
-/* Input Fields */
 .reservation-form input,
 .reservation-form select,
 .reservation-form textarea {
   width: 100%;
-  padding: 0.7rem 1rem;
+  padding: 0.75rem 1rem;
   border: 1px solid #ccc;
-  border-radius: 8px;
+  border-radius: 0.5rem;
   font-size: 1rem;
-  background-color: #fdfdfd;
-  transition: border 0.2s ease;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
 }
 
 .reservation-form input:focus,
 .reservation-form select:focus,
 .reservation-form textarea:focus {
   border-color: #0a3d62;
+  background-color: #fff;
   outline: none;
 }
 
-/* Textarea */
 .reservation-form textarea {
   resize: vertical;
   min-height: 100px;
 }
 
-/* Price Summary */
 .price-summary {
-  background-color: #f1f1f1;
+  background-color: #f8f9fa;
   padding: 1rem;
   border-radius: 0.5rem;
   color: #444;
   font-weight: 500;
-  line-height: 1.6;
-  margin-top: 0.5rem;
   border: 1px solid #ddd;
 }
 
-/* Submit Button */
 .submit-btn {
   background-color: #e84393;
-  color: white;
-  padding: 0.75rem 1.5rem;
+  color: #fff;
+  padding: 0.75rem;
   font-size: 1rem;
   font-weight: bold;
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: background 0.3s ease-in-out;
-  margin-top: 1rem;
+  transition: background 0.3s ease;
 }
 
 .submit-btn:hover {
   background-color: #d63072;
-  box-shadow: 0 4px 12px rgba(232, 67, 147, 0.2);
+  box-shadow: 0 4px 12px rgba(232, 67, 147, 0.3);
 }
 
-/* Responsive Design */
 @media (max-width: 640px) {
   .reservation-form {
-    padding: 1.5rem;
+    padding: 1.2rem;
   }
-
-  .reservation-page {
-    padding: 1rem;
-  }
-
   .submit-btn {
     width: 100%;
-    text-align: center;
   }
 }
