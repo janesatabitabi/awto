@@ -1,4 +1,3 @@
-// ReservationPage.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -31,15 +30,18 @@ const ReservationPage = () => {
   const [preferredTime, setPreferredTime] = useState("");
   const [note, setNote] = useState("");
 
-  const [reservedDates, setReservedDates] = useState([]);
   const [reservedTimes, setReservedTimes] = useState([]);
   const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
+  // Track auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
     return () => unsubscribe();
   }, []);
 
+  // Fetch product details
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -47,9 +49,11 @@ const ReservationPage = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           setProduct({ ...docSnap.data(), id: docSnap.id });
+        } else {
+          setProduct(null);
         }
       } catch (error) {
-        console.error("Fetch error:", error);
+        console.error("Fetch product error:", error);
       } finally {
         setLoading(false);
       }
@@ -57,32 +61,44 @@ const ReservationPage = () => {
     fetchProduct();
   }, [productId]);
 
+  // Fetch reserved times for selected date
   useEffect(() => {
     const fetchReservedData = async () => {
+      if (!productId || !preferredDate) return;
+
       const selectedDate = preferredDate.toISOString().split("T")[0];
-      const q = query(
-        collection(db, "reservations"),
-        where("productId", "==", productId),
-        where("preferredDateTime", ">=", `${selectedDate} 00:00`),
-        where("preferredDateTime", "<=", `${selectedDate} 23:59`)
-      );
-      const snapshot = await getDocs(q);
-      const times = [];
-      snapshot.forEach((doc) => {
-        const [, time] = doc.data().preferredDateTime.split(" ");
-        times.push(time);
-      });
-      setReservedTimes(times);
+      try {
+        const q = query(
+          collection(db, "reservations"),
+          where("productId", "==", productId),
+          where("preferredDateTime", ">=", `${selectedDate} 00:00`),
+          where("preferredDateTime", "<=", `${selectedDate} 23:59`)
+        );
+        const snapshot = await getDocs(q);
+        const times = [];
+        snapshot.forEach((doc) => {
+          const dt = doc.data().preferredDateTime;
+          const time = typeof dt === "string"
+            ? dt.split(" ")[1]
+            : dt.toDate().toTimeString().slice(0, 5); // fallback for Timestamp
+          times.push(time);
+        });
+        setReservedTimes(times);
+      } catch (error) {
+        console.error("Fetch reserved times error:", error);
+        setReservedTimes([]);
+      }
     };
     fetchReservedData();
   }, [preferredDate, productId]);
 
+  // Handle submission
   const handleSubmit = async () => {
     if (!user) return alert("Login required");
     if (!preferredDate || !preferredTime || !vehicleInfo)
       return alert("Please fill in all required fields.");
 
-    const price = Number(product.price);
+    const price = Number(product.price || 0);
     const downpayment = Math.floor(price * 0.3);
     const formattedDate = preferredDate.toLocaleDateString("en-CA");
 
@@ -118,6 +134,9 @@ const ReservationPage = () => {
   if (loading) return <div className="reservation-page">Loading...</div>;
   if (!product)
     return <div className="reservation-page">Product not found.</div>;
+
+  const price = Number(product.price || 0);
+  const downpayment = Math.floor(price * 0.3);
 
   return (
     <div className="reservation-page">
@@ -157,7 +176,11 @@ const ReservationPage = () => {
         >
           <option value="">Select a time</option>
           {timeSlots.map((time) => (
-            <option key={time} value={time} disabled={reservedTimes.includes(time)}>
+            <option
+              key={time}
+              value={time}
+              disabled={reservedTimes.includes(time)}
+            >
               {time} {reservedTimes.includes(time) ? "(Reserved)" : ""}
             </option>
           ))}
@@ -172,7 +195,7 @@ const ReservationPage = () => {
 
         <div className="price-summary">
           <p>
-            <strong>Price:</strong> ₱{product.price}
+            <strong>Price:</strong> ₱{price}
           </p>
           <p>
             <strong>Downpayment:</strong> ₱{downpayment}
