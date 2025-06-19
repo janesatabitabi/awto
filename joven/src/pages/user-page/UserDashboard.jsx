@@ -10,7 +10,7 @@ import '../../styles/UserDashboard.css';
 const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const initialFilters = location.state || {}; // ✅ Load filters passed from Fitment
+  const initialFilters = location.state || {}; // 
   const [filters, setFilters] = useState(initialFilters);
 
   const handleLogout = async () => {

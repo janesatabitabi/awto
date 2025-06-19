@@ -1,4 +1,3 @@
-// src/components/ViewProduct.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -9,7 +8,7 @@ import {
   serverTimestamp,
   query,
   where,
-  getDocs
+  getDocs,
 } from "firebase/firestore";
 import { FiShoppingCart } from "react-icons/fi";
 import { db, auth } from "../firebase";
@@ -29,7 +28,7 @@ const ViewProduct = () => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setProduct({ ...data, id: docSnap.id });
-          setMainImage(data.images?.[0] || "");
+          setMainImage(data.images?.[0] || data.imageUrl || "");
         } else {
           console.error("Product not found");
         }
@@ -53,7 +52,11 @@ const ViewProduct = () => {
 
     try {
       const cartRef = collection(db, "cartSelections");
-      const q = query(cartRef, where("userId", "==", user.uid), where("productId", "==", product.id));
+      const q = query(
+        cartRef,
+        where("userId", "==", user.uid),
+        where("productId", "==", product.id)
+      );
       const existing = await getDocs(q);
 
       if (!existing.empty) {
@@ -67,7 +70,7 @@ const ViewProduct = () => {
         productName: product.name,
         brand: product.brand,
         price: product.price,
-        createdAt: serverTimestamp()
+        createdAt: serverTimestamp(),
       });
 
       alert("Added to My Selections!");
@@ -80,6 +83,10 @@ const ViewProduct = () => {
     return <div className="view-product">Loading product details...</div>;
   }
 
+  const displayName = product.size && product.model
+    ? `${product.size} ${product.model}`
+    : product.name;
+
   return (
     <div className="view-product">
       <button className="back-button" onClick={() => navigate(-1)}>
@@ -89,9 +96,16 @@ const ViewProduct = () => {
       <div className="product-container">
         {/* Images */}
         <div className="product-images">
-          <img src={mainImage} alt="Main" className="main-image" />
+          <img
+            src={mainImage || "https://placehold.co/300x300?text=No+Image"}
+            alt="Main"
+            className="main-image"
+            onError={(e) =>
+              (e.target.src = "https://placehold.co/300x300?text=No+Image")
+            }
+          />
           <div className="thumbnail-row">
-            {product.images?.map((img, index) => (
+            {(product.images || []).map((img, index) => (
               <img
                 key={index}
                 src={img}
@@ -106,11 +120,17 @@ const ViewProduct = () => {
         {/* Product Info */}
         <div className="product-info">
           <span className="tag">NEW</span>
+
           <h2 className="brand-logo">{product.brand || "No Brand"}</h2>
-          <h1 className="product-name">{product.name || "No Name"}</h1>
+          <h1 className="product-name">{displayName}</h1>
           <p className="review-label">Be The First To Review This Product</p>
-          <p className="finish-label">
+
+          <p className="detail-line">
             <strong>Finish:</strong> {product.finish || "N/A"}
+          </p>
+
+          <p className="price">
+            <strong>Price:</strong> ₱{product.price?.toLocaleString() || "N/A"}
           </p>
 
           <div className="options-section">
@@ -144,12 +164,16 @@ const ViewProduct = () => {
             </p>
           </details>
 
-          {/* ✅ Buttons */}
+          {/* Buttons */}
           <div className="button-row">
             <button className="reserve-button" onClick={handleReserveClick}>
               Reserve Now
             </button>
-            <button className="icon-button" onClick={handleAddToCart} title="Add to My Selections">
+            <button
+              className="icon-button"
+              onClick={handleAddToCart}
+              title="Add to My Selections"
+            >
               <FiShoppingCart size={24} />
             </button>
           </div>
