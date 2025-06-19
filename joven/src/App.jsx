@@ -14,6 +14,7 @@ import { auth, db } from './firebase';
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 import ViewProduct from './components/ViewProduct';
+import Verify from './pages/Verify';
 
 // Admin Pages
 import AdminDashboard from './pages/admin-page/AdminDashboard';
@@ -29,6 +30,9 @@ import AdminSettings from './pages/admin-page/Settings';
 import UserDashboard from './pages/user-page/UserDashboard';
 import UserProfile from './pages/user-page/UserProfile';
 
+// Reservation Page (✅ Correct import path from components)
+import ReservationPage from './components/ReservationPage';
+
 // Staff Pages
 import StaffDashboard from './pages/staff-page/StaffDashboard';
 import StaffInventory from './pages/staff-page/StaffInventory';
@@ -36,9 +40,6 @@ import StaffInventory from './pages/staff-page/StaffInventory';
 // Auth Guards
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import RequireVerifiedEmail from './components/RequireVerifiedEmail';
-
-import Verify from './pages/Verify';
-
 
 // Spinner UI
 const Spinner = () => (
@@ -61,11 +62,9 @@ const ProtectedRoute = ({ role, children }) => {
       }
 
       try {
-        // Try admin
         let ref = doc(db, 'users', user.uid);
         let snap = await getDoc(ref);
 
-        // If not found in users, try staff
         if (!snap.exists()) {
           ref = doc(db, 'staff', user.uid);
           snap = await getDoc(ref);
@@ -96,7 +95,6 @@ const ProtectedRoute = ({ role, children }) => {
   return granted ? children : null;
 };
 
-// ✅ Helper wrapper to pass pathname as origin
 const WithOrigin = ({ children }) => {
   const location = useLocation();
   return React.cloneElement(children, { origin: location.pathname });
@@ -130,8 +128,18 @@ export default function App() {
         />
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
+        <Route
+          path="/reserve/:productId"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="User">
+                <ReservationPage />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
 
-        {/* User Profile Route */}
+        {/* User Routes */}
         <Route
           path="/profile"
           element={
@@ -174,19 +182,7 @@ export default function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* User Dashboard */}
-        <Route
-          path="/user-dashboard"
-          element={
-            <RequireVerifiedEmail>
-              <ProtectedRoute role="User">
-                <UserDashboard />
-              </ProtectedRoute>
-            </RequireVerifiedEmail>
-          }
-        />
-
-        {/* Staff Dashboard & Pages */}
+        {/* Staff Routes */}
         <Route
           path="/staff-dashboard"
           element={
