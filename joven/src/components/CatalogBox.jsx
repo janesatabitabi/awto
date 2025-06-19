@@ -11,7 +11,10 @@ const CatalogBox = ({ filters }) => {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
-      const fetched = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const fetched = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       setProducts(fetched);
     });
     return () => unsubscribe();
@@ -35,26 +38,46 @@ const CatalogBox = ({ filters }) => {
 
   return (
     <div className="catalog">
-      <div className="catalog-controls">
-      </div>
       <div className="product-grid">
         {filteredProducts.length === 0 ? (
           <p>No products available.</p>
         ) : (
-          filteredProducts.map((product) => (
-            <div key={product.id} className="product-card" onClick={() => handleView(product.id)}>
-              {product.new && <div className="tag">NEW</div>}
-              <img
-                src={product.image || "https://placehold.co/150x150?text=No+Image"}
-                alt={product.name}
-                className="product-img"
-              />
-              <h4 className="product-name">{product.brand}</h4>
-              <p className="product-brand">{product.model || "—"}</p>
-              <p className="product-price">₱{product.price}</p>
-              <div className="product-rating">★★★★☆ 1 Review</div>
-            </div>
-          ))
+          filteredProducts.map((product) => {
+            const size = product.size || "Unknown Size";
+            const model = product.model || "Unknown Model";
+            const brand = product.brand || "Unknown Brand";
+            const price = product.price?.toLocaleString() || "N/A";
+            const image = product.imageUrl || "https://placehold.co/150x150?text=No+Image";
+            const reviewCount = product.reviews?.length || 1;
+
+            return (
+              <div
+                key={product.id}
+                className="product-card"
+                onClick={() => handleView(product.id)}
+              >
+                {product.new && <div className="tag">NEW</div>}
+                <img
+                  src={image}
+                  alt={product.name || "Product Image"}
+                  className="product-img"
+                  onError={(e) =>
+                    (e.target.src = "https://placehold.co/150x150?text=No+Image")
+                  }
+                />
+                <h4 className="product-name">{brand}</h4>
+                <p className="product-model-size">
+                  {size} {model}
+                </p>
+                <p className="product-price">
+                  ₱{price}
+                </p>
+                <div className="product-rating">
+                  ★★★★☆ ({reviewCount} Review{reviewCount > 1 ? "s" : ""})
+                </div>
+              </div>
+            );
+          })
         )}
       </div>
     </div>
