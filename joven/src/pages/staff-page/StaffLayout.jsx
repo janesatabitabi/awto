@@ -1,11 +1,11 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebase';
-import { useNavigate } from 'react-router-dom';
+import { auth } from '../../firebase';
+import { FiBox, FiHome, FiLogOut } from 'react-icons/fi';
+import '../../styles/staff-styles/StaffLayout.css';
 
 const StaffLayout = ({ children }) => {
-  const location = useLocation();
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -13,40 +13,35 @@ const StaffLayout = ({ children }) => {
     navigate('/login');
   };
 
-  const navItems = [
-    { label: 'Dashboard', path: '/staff-dashboard' },
-    { label: 'Inventory', path: '/staff-inventory' },
-    { label: 'Tasks', path: '/staff-tasks' },
-  ];
-
   return (
-    <div className="flex min-h-screen">
+    <div className="dashboard-container">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white flex flex-col py-6 px-4">
-        <h2 className="text-2xl font-bold mb-6 text-center">Staff Panel</h2>
-        <nav className="flex flex-col gap-4 flex-grow">
-          {navItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`px-4 py-2 rounded-md hover:bg-gray-700 ${
-                location.pathname === item.path ? 'bg-gray-700' : ''
-              }`}
-            >
-              {item.label}
-            </Link>
-          ))}
+      <aside className="sidebar">
+        <div className="logo-section">
+          <h1 className="logo">AWTO Staff</h1>
+        </div>
+
+        <nav className="sidebar-nav">
+          <NavLink to="/staff-dashboard" className="nav-link">
+            <FiHome className="icon" />
+            <span>Dashboard</span>
+          </NavLink>
+          <NavLink to="/staff-inventory" className="nav-link">
+            <FiBox className="icon" />
+            <span>Inventory</span>
+          </NavLink>
         </nav>
-        <button
-          onClick={handleLogout}
-          className="mt-auto px-4 py-2 bg-red-500 hover:bg-red-600 rounded-md"
-        >
-          Logout
+
+        <button onClick={handleLogout} className="logout-button">
+          <FiLogOut className="icon" />
+          <span>Logout</span>
         </button>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 bg-gray-100 p-8">{children}</main>
+      {/* Main Content */}
+      <main className="main-content">
+        {children}
+      </main>
     </div>
   );
 };

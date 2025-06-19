@@ -2,7 +2,7 @@ import React from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
-import '../../styles/AdminDashboard.css';
+import '../../styles/admin-styles/AdminDashboard.css';
 
 const AdminDashboard = () => {
   const location = useLocation();

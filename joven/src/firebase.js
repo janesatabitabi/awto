@@ -17,14 +17,18 @@ const firebaseConfig = {
   measurementId: "G-V6K71Q2YSR"
 };
 
-// Initialize Firebase App
+// Initialize Main Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase Services
+// Main Firebase Services
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Export for use in other components
-export { auth, provider, db, storage };
+// ✅ Initialize Secondary Firebase App for Staff Creation (does not affect admin session)
+const secondaryApp = initializeApp(firebaseConfig, 'Secondary');
+const secondaryAuth = getAuth(secondaryApp);
+
+// Export everything
+export { auth, provider, db, storage, secondaryAuth };
