@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import '../styles/Fitment.css';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 
 const Fitment = () => {
+  const navigate = useNavigate();
+
   const [filters, setFilters] = useState({
     year: '',
     make: '',
@@ -103,6 +106,7 @@ const Fitment = () => {
   const handleShowResults = async () => {
     setLoading(true);
     const { year, make, model, trim, drive } = filters;
+
     const q = query(
       collection(db, 'tireProducts'),
       where('year', '==', year),
@@ -116,6 +120,9 @@ const Fitment = () => {
     const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     setSuggestedProducts(products);
     setLoading(false);
+
+    // Redirect and pass filters to dashboard
+    navigate('/user-dashboard', { state: filters });
   };
 
   return (
@@ -162,21 +169,6 @@ const Fitment = () => {
             {loading ? 'Loading...' : 'SHOP NOW'}
           </button>
         </div>
-
-        {suggestedProducts.length > 0 && (
-          <div className="suggestions">
-            <h3 style={{ color: '#adff2f', marginTop: '2rem' }}>Suggested Tires:</h3>
-            <div className="product-grid">
-              {suggestedProducts.map(product => (
-                <div key={product.id} className="product-card">
-                  <img src={product.image} alt={product.name} className="product-image" />
-                  <h4>{product.name}</h4>
-                  <p>₱{product.price.toLocaleString()}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
     </section>
   );

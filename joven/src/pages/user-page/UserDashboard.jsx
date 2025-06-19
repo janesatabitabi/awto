@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import Navbar from '../../components/Navbar';
@@ -9,7 +9,9 @@ import '../../styles/UserDashboard.css';
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const [filters, setFilters] = useState({}); // ✅ Track filters
+  const location = useLocation();
+  const initialFilters = location.state || {}; // ✅ Load filters passed from Fitment
+  const [filters, setFilters] = useState(initialFilters);
 
   const handleLogout = async () => {
     try {
@@ -29,10 +31,10 @@ const UserDashboard = () => {
 
         <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
           <div style={{ flex: 1 }}>
-            <Filter onChange={setFilters} /> {/* ✅ Pass filter setter */}
+            <Filter onChange={setFilters} initialFilters={initialFilters} /> {/* Optional: Add support for initialFilters */}
           </div>
           <div style={{ flex: 3 }}>
-            <CatalogBox filters={filters} /> {/* ✅ Pass current filters */}
+            <CatalogBox filters={filters} />
           </div>
         </div>
       </div>

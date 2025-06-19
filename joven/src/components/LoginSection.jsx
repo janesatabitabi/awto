@@ -30,33 +30,40 @@ const LoginSection = ({ onClose, origin }) => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Try both users and staff collections
       const userRef = doc(db, 'users', user.uid);
-      const userSnap = await getDoc(userRef);
+      const staffRef = doc(db, 'staff', user.uid);
 
-      if (!userSnap.exists()) {
-        setError('User data not found in Firestore.');
+      const [userSnap, staffSnap] = await Promise.all([
+        getDoc(userRef),
+        getDoc(staffRef),
+      ]);
+
+      let userData = null;
+      if (userSnap.exists()) {
+        userData = userSnap.data();
+      } else if (staffSnap.exists()) {
+        userData = staffSnap.data();
+      } else {
+        setError('User record not found in Firestore.');
         return;
       }
 
-      const userData = userSnap.data();
-
-      // Store locally for OTP or other features
+      // Store locally for possible future use
       localStorage.setItem('isOTPVerified', 'true');
       localStorage.setItem('userData', JSON.stringify(userData));
 
-      // 🧠 Redirect based on role and origin
+      // Redirect based on role
       if (!user.emailVerified) {
         navigate('/verify');
       } else if (userData.role === 'Admin') {
         navigate('/admin-dashboard');
+      } else if (userData.role === 'User') {
+        navigate('/');
+      } else if (userData.role === 'Staff') {
+        navigate('/staff-dashboard');
       } else {
-        // 👇 Force '/' if logging in from '/register'
-        if (origin === '/register') {
-          navigate('/');
-        } else {
-          // You may customize this to remember last location later
-          navigate('/');
-        }
+        setError('Unknown user role.');
       }
 
       if (onClose) onClose();
