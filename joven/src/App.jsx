@@ -37,6 +37,9 @@ import StaffInventory from './pages/staff-page/StaffInventory';
 import RedirectIfAuthenticated from './components/RedirectIfAuthenticated';
 import RequireVerifiedEmail from './components/RequireVerifiedEmail';
 
+import Verify from './pages/Verify';
+
+
 // Spinner UI
 const Spinner = () => (
   <div className="flex justify-center items-center h-screen">

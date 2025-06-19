@@ -122,7 +122,7 @@ const Fitment = () => {
     setLoading(false);
 
     // Redirect and pass filters to dashboard
-    navigate('/dashboard', { state: filters });
+    navigate('/user-dashboard', { state: filters });
   };
 
   return (
