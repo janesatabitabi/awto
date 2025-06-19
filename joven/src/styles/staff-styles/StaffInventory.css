@@ -1,35 +1,139 @@
-/* =============== STAFF INVENTORY PAGE =============== */
-.staff-inventory {
+/* src/styles/staff-styles/StaffInventory.css */
+
+/* =============== CONTAINER FOR STAFF INVENTORY PAGE ONLY =============== */
+.staff-inventory-page-container {
   padding: 2rem;
+  font-family: 'Inter', sans-serif; /* Using Inter as per default instruction */
+  box-sizing: border-box;
+  width: 100%;
 }
 
-.staff-inventory h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #2563eb;
-  margin-bottom: 1rem;
+/* =============== HEADER & CONTROLS =============== */
+.staff-inventory-page-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  color: #1a202c; /* Equivalent to text-gray-800 */
 }
 
-.staff-inventory table {
+.staff-inventory-controls {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.staff-search-bar {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0; /* Equivalent to border-gray-300 */
+  border-radius: 0.5rem; /* Equivalent to rounded-lg */
+  font-size: 1rem;
+  color: #4a5568; /* Equivalent to text-gray-700 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Equivalent to shadow-sm */
+}
+
+.staff-search-bar:focus {
+  outline: none;
+  border-color: #3b82f6; /* Equivalent to border-blue-500 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Equivalent to ring-blue-500 */
+}
+
+.staff-sort-select {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0; /* Equivalent to border-gray-300 */
+  border-radius: 0.5rem; /* Equivalent to rounded-lg */
+  font-size: 1rem;
+  color: #4a5568; /* Equivalent to text-gray-700 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Equivalent to shadow-sm */
+}
+
+.staff-sort-select:focus {
+  outline: none;
+  border-color: #3b82f6; /* Equivalent to border-blue-500 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Equivalent to ring-blue-500 */
+}
+
+/* =============== TABLE STYLES =============== */
+.staff-inventory-card {
+  background-color: #fff;
+  padding: 1.5rem;
+  border-radius: 0.5rem; /* Equivalent to rounded-lg */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* Equivalent to shadow-md */
+  overflow-x: auto;
+}
+
+.staff-inventory-table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
 }
 
-.staff-inventory th,
-.staff-inventory td {
-  padding: 0.75rem 1rem;
+.staff-inventory-table thead {
+  background-color: #f9fafb; /* Equivalent to bg-gray-50 */
+}
+
+.staff-inventory-table th,
+.staff-inventory-table td {
+  padding: 0.75rem 1.5rem; /* Equivalent to px-6 py-3 / px-6 py-4 */
   text-align: left;
-  border-bottom: 1px solid #e5e7eb;
+  font-size: 0.875rem; /* Equivalent to text-sm */
+  border-bottom: 1px solid #e5e7eb; /* Equivalent to divide-y divide-gray-200 */
 }
 
-.staff-inventory th {
-  background-color: #f1f5f9;
-  font-weight: 600;
-  color: #1e293b;
+.staff-inventory-table th {
+  font-weight: 500; /* Equivalent to font-medium */
+  color: #6b7280; /* Equivalent to text-gray-500 */
+  text-transform: uppercase;
+  letter-spacing: 0.05em; /* Equivalent to tracking-wider */
 }
 
-.staff-inventory tr:hover {
-  background-color: #f9fafb;
+.staff-inventory-table tbody tr {
+  background-color: #fff; /* Equivalent to bg-white */
+}
+
+/* Zebra striping for table rows (optional, if not handled by Tailwind classes) */
+.staff-inventory-table tbody tr:nth-child(even) {
+  /* background-color: #fcfcfc; */
+}
+
+.staff-inventory-table tbody tr:nth-child(odd) {
+  /* background-color: #fefefe; */
+}
+
+.staff-inventory-table td {
+  white-space: nowrap; /* Equivalent to whitespace-nowrap */
+  color: #4a5568; /* Equivalent to text-gray-700 */
+}
+
+.status-out-of-stock {
+  color: #dc2626; /* Equivalent to text-red-600 */
+  font-weight: 600; /* Equivalent to font-semibold */
+}
+
+.status-in-stock {
+  color: #16a34a; /* Equivalent to text-green-600 */
+}
+
+.text-center-cell {
+  text-align: center;
+}
+
+.text-gray-500-no-products {
+  color: #888; /* Specific for the "No products found" message */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .staff-inventory-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .staff-search-bar,
+  .staff-sort-select {
+    width: 100%;
+    min-width: unset;
+  }
 }

@@ -30,6 +30,14 @@ const StaffLayout = ({ children }) => {
             <FiBox className="icon" />
             <span>Inventory</span>
           </NavLink>
+          <NavLink to="/staff-sales" className="nav-link">
+            <FiBox className="icon" />
+            <span>Sales</span>
+          </NavLink>
+          <NavLink to="/staff-reservation" className="nav-link">
+            <FiBox className="icon" />
+            <span>Reservation</span>
+          </NavLink>
         </nav>
 
         <button onClick={handleLogout} className="logout-button">
