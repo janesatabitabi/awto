@@ -6,12 +6,12 @@ import {
   addDoc,
   collection,
   getDocs,
-  serverTimestamp,
   query,
   where,
+  serverTimestamp,
 } from "firebase/firestore";
-import { db, auth } from "../firebase";
 import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "../firebase";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "../styles/ReservationPage.css";
@@ -25,23 +25,23 @@ const ReservationPage = () => {
   const [loading, setLoading] = useState(true);
 
   const [serviceType, setServiceType] = useState("Installation");
-  const [vehicleInfo, setVehicleInfo] = useState("");
+  const [vehicleBrand, setVehicleBrand] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
+  const [vehicleYear, setVehicleYear] = useState("");
+  const [plateNumber, setPlateNumber] = useState("");
+
   const [preferredDate, setPreferredDate] = useState(new Date());
   const [preferredTime, setPreferredTime] = useState("");
   const [note, setNote] = useState("");
-
   const [reservedTimes, setReservedTimes] = useState([]);
+
   const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
 
-  // Track auth state
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+    const unsubscribe = onAuthStateChanged(auth, setUser);
     return () => unsubscribe();
   }, []);
 
-  // Fetch product details
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -53,7 +53,7 @@ const ReservationPage = () => {
           setProduct(null);
         }
       } catch (error) {
-        console.error("Fetch product error:", error);
+        console.error("Failed to fetch product:", error);
       } finally {
         setLoading(false);
       }
@@ -61,48 +61,51 @@ const ReservationPage = () => {
     fetchProduct();
   }, [productId]);
 
-  // Fetch reserved times for selected date
   useEffect(() => {
-    const fetchReservedData = async () => {
+    const fetchReservedSlots = async () => {
       if (!productId || !preferredDate) return;
-
       const selectedDate = preferredDate.toISOString().split("T")[0];
       try {
         const q = query(
           collection(db, "reservations"),
           where("productId", "==", productId),
           where("preferredDateTime", ">=", `${selectedDate} 00:00`),
-          where("preferredDateTime", "<=", `${selectedDate} 23:59`)
+          where("preferredDateTime", "<=", `${selectedDate} 23:59`),
+          where("isCancelled", "==", false)
         );
         const snapshot = await getDocs(q);
-        const times = [];
+        const takenTimes = [];
         snapshot.forEach((doc) => {
-          const dt = doc.data().preferredDateTime;
-          const time = typeof dt === "string"
-            ? dt.split(" ")[1]
-            : dt.toDate().toTimeString().slice(0, 5); // fallback for Timestamp
-          times.push(time);
+          const time = doc.data().preferredDateTime.split(" ")[1];
+          takenTimes.push(time);
         });
-        setReservedTimes(times);
+        setReservedTimes(takenTimes);
       } catch (error) {
-        console.error("Fetch reserved times error:", error);
-        setReservedTimes([]);
+        console.error("Error fetching time slots:", error);
       }
     };
-    fetchReservedData();
+    fetchReservedSlots();
   }, [preferredDate, productId]);
 
-  // Handle submission
   const handleSubmit = async () => {
-    if (!user) return alert("Login required");
-    if (!preferredDate || !preferredTime || !vehicleInfo)
-      return alert("Please fill in all required fields.");
+    if (!user) return alert("You must be logged in.");
+    if (
+      !vehicleBrand ||
+      !vehicleModel ||
+      !vehicleYear ||
+      !plateNumber ||
+      !preferredDate ||
+      !preferredTime
+    ) {
+      return alert("Please complete all required fields.");
+    }
 
+    const formattedDate = preferredDate.toLocaleDateString("en-CA");
+    const fullDateTime = `${formattedDate} ${preferredTime}`;
     const price = Number(product.price || 0);
     const downpayment = Math.floor(price * 0.3);
-    const formattedDate = preferredDate.toLocaleDateString("en-CA");
 
-    const data = {
+    const reservationData = {
       userId: user.uid,
       productId: product.id,
       productName: product.name,
@@ -110,56 +113,72 @@ const ReservationPage = () => {
       type: product.type,
       size: product.size,
       price,
-      serviceType,
-      vehicleInfo,
-      preferredDateTime: `${formattedDate} ${preferredTime}`,
-      note,
-      status: "Pending Payment",
       downpayment,
+      serviceType,
+      vehicleBrand,
+      vehicleModel,
+      vehicleYear,
+      plateNumber,
+      preferredDateTime: fullDateTime,
+      note,
       paymentMethod: "PayMongo",
-      createdAt: serverTimestamp(),
+      status: "Pending Payment",
       isCancelled: false,
+      createdAt: serverTimestamp(),
     };
 
     try {
-      await addDoc(collection(db, "reservations"), data);
-      alert("Reservation submitted successfully.");
+      await addDoc(collection(db, "reservations"), reservationData);
+      alert("Reservation submitted! Redirecting to My Selections...");
       navigate("/my-selections");
-    } catch (e) {
-      console.error("Reservation error:", e);
-      alert("Submission failed. Please try again.");
+    } catch (err) {
+      console.error("Reservation error:", err);
+      alert("Something went wrong. Please try again.");
     }
   };
 
   if (loading) return <div className="reservation-page">Loading...</div>;
-  if (!product)
-    return <div className="reservation-page">Product not found.</div>;
-
-  const price = Number(product.price || 0);
-  const downpayment = Math.floor(price * 0.3);
+  if (!product) return <div className="reservation-page">Product not found.</div>;
 
   return (
     <div className="reservation-page">
-      <button className="back-button" onClick={() => navigate(-1)}>
-        ← Back
-      </button>
+      <button className="back-button" onClick={() => navigate(-1)}>← Back</button>
       <h2>Reserve: {product.name}</h2>
       <div className="reservation-form">
         <label>Service Type</label>
-        <select
-          value={serviceType}
-          onChange={(e) => setServiceType(e.target.value)}
-        >
+        <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
           <option>Installation</option>
           <option>Wheel Alignment</option>
           <option>Balancing</option>
         </select>
 
         <label>Vehicle Info</label>
+        <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+          <input
+            value={vehicleBrand}
+            onChange={(e) => setVehicleBrand(e.target.value)}
+            placeholder="Brand (e.g. Toyota)"
+            style={{ flex: 1 }}
+          />
+          <input
+            value={vehicleModel}
+            onChange={(e) => setVehicleModel(e.target.value)}
+            placeholder="Model (e.g. Vios)"
+            style={{ flex: 1 }}
+          />
+          <input
+            value={vehicleYear}
+            onChange={(e) => setVehicleYear(e.target.value)}
+            placeholder="Year (e.g. 2020)"
+            style={{ flex: 1 }}
+          />
+        </div>
+
+        <label>Plate Number</label>
         <input
-          value={vehicleInfo}
-          onChange={(e) => setVehicleInfo(e.target.value)}
-          placeholder="e.g. Toyota Vios 2020"
+          value={plateNumber}
+          onChange={(e) => setPlateNumber(e.target.value)}
+          placeholder="e.g. ABC 1234"
         />
 
         <label>Preferred Date</label>
@@ -170,18 +189,11 @@ const ReservationPage = () => {
         />
 
         <label>Preferred Time</label>
-        <select
-          value={preferredTime}
-          onChange={(e) => setPreferredTime(e.target.value)}
-        >
+        <select value={preferredTime} onChange={(e) => setPreferredTime(e.target.value)}>
           <option value="">Select a time</option>
-          {timeSlots.map((time) => (
-            <option
-              key={time}
-              value={time}
-              disabled={reservedTimes.includes(time)}
-            >
-              {time} {reservedTimes.includes(time) ? "(Reserved)" : ""}
+          {timeSlots.map((slot) => (
+            <option key={slot} value={slot} disabled={reservedTimes.includes(slot)}>
+              {slot} {reservedTimes.includes(slot) ? "(Reserved)" : ""}
             </option>
           ))}
         </select>
@@ -194,12 +206,8 @@ const ReservationPage = () => {
         />
 
         <div className="price-summary">
-          <p>
-            <strong>Price:</strong> ₱{price}
-          </p>
-          <p>
-            <strong>Downpayment:</strong> ₱{downpayment}
-          </p>
+          <p><strong>Price:</strong> ₱{product.price}</p>
+          <p><strong>Downpayment:</strong> ₱{Math.floor(product.price * 0.3)}</p>
         </div>
 
         <button className="submit-btn" onClick={handleSubmit}>
