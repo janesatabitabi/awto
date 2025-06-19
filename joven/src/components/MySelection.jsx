@@ -1,57 +1,124 @@
+// src/pages/admin-page/Reservations.jsx
 import React, { useEffect, useState } from "react";
-import { collection, getDocs, query, where } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
-import { db, auth } from "../../firebase";
-import "../../styles/MySelection.css";
+import { db } from "../../firebase";
+import {
+  collection,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import "../../styles/admin-styles/Reservations.css";
 
-const MySelection = () => {
+const Reservations = () => {
   const [reservations, setReservations] = useState([]);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setUser(user);
-        const q = query(
-          collection(db, "reservations"),
-          where("userId", "==", user.uid)
-        );
-        const snapshot = await getDocs(q);
-        const results = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setReservations(results);
-      }
-      setLoading(false);
+    const unsub = onSnapshot(collection(db, "reservations"), (snapshot) => {
+      const list = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      setReservations(list);
     });
-
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
-  if (loading) return <div className="my-selections-page">Loading...</div>;
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const reservationRef = doc(db, "reservations", id);
+      await updateDoc(reservationRef, { status: newStatus });
+      console.log("Status updated");
+    } catch (error) {
+      console.error("Error updating reservation status:", error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this reservation?")) {
+      try {
+        await deleteDoc(doc(db, "reservations", id));
+        console.log("Reservation deleted");
+      } catch (error) {
+        console.error("Error deleting reservation:", error);
+      }
+    }
+  };
+
+  const filtered = reservations.filter((r) =>
+    `${r.productName} ${r.plateNumber}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="my-selections-page">
-      <h2>My Reservations</h2>
-      {reservations.length === 0 ? (
-        <p>No reservations yet.</p>
-      ) : (
-        <div className="reservation-list">
-          {reservations.map((res) => (
-            <div key={res.id} className="reservation-card">
-              <h3>{res.productName}</h3>
-              <p><strong>Service:</strong> {res.serviceType}</p>
-              <p><strong>Date & Time:</strong> {res.preferredDateTime}</p>
-              <p><strong>Price:</strong> ₱{res.price.toLocaleString()}</p>
-              <p><strong>Status:</strong> {res.status}</p>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="reservations-container">
+      <div className="reservations-header">
+        <h1>📅 Reservations</h1>
+        <input
+          type="text"
+          placeholder="Search by product or plate..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="reservation-search"
+        />
+      </div>
+
+      <div className="reservation-table-wrapper">
+        <table className="reservation-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Vehicle</th>
+              <th>Plate</th>
+              <th>Service</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((res) => (
+              <tr key={res.id}>
+                <td>{res.productName}</td>
+                <td>{`${res.vehicleBrand} ${res.vehicleModel} (${res.vehicleYear})`}</td>
+                <td>{res.plateNumber}</td>
+                <td>{res.serviceType}</td>
+                <td>{res.preferredDateTime}</td>
+                <td>
+                  <select
+                    className="status-dropdown"
+                    value={res.status}
+                    onChange={(e) =>
+                      handleStatusChange(res.id, e.target.value)
+                    }
+                  >
+                    <option value="Pending Payment">Pending Payment</option>
+                    <option value="Confirmed">Confirmed</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </td>
+                <td>
+                  <button
+                    onClick={() => handleDelete(res.id)}
+                    className="delete-btn"
+                  >
+                    🗑 Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan="7" className="text-center">
+                  No reservations found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
-export default MySelection;
+export default Reservations;
