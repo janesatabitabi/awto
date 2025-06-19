@@ -137,7 +137,6 @@ const Navbar = () => {
       {showLogin && (
         <div className="login-popup-overlay" onClick={() => setShowLogin(false)}>
           <div className="login-popup" onClick={(e) => e.stopPropagation()}>
-            <button className="close-popup" onClick={() => setShowLogin(false)}>✖</button>
             <LoginSection
               onClose={() => setShowLogin(false)}
               onLoginSuccess={handleLoginSuccess}

@@ -1,7 +1,18 @@
+// src/components/ViewProduct.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import {
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  serverTimestamp,
+  query,
+  where,
+  getDocs
+} from "firebase/firestore";
+import { FiShoppingCart } from "react-icons/fi";
+import { db, auth } from "../firebase";
 import "../styles/ViewProduct.css";
 
 const ViewProduct = () => {
@@ -17,7 +28,7 @@ const ViewProduct = () => {
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setProduct(data);
+          setProduct({ ...data, id: docSnap.id });
           setMainImage(data.images?.[0] || "");
         } else {
           console.error("Product not found");
@@ -28,6 +39,42 @@ const ViewProduct = () => {
     };
     fetchProduct();
   }, [id]);
+
+  const handleReserveClick = () => {
+    navigate(`/reserve/${product.id}`);
+  };
+
+  const handleAddToCart = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must be logged in to add to selections.");
+      return;
+    }
+
+    try {
+      const cartRef = collection(db, "cartSelections");
+      const q = query(cartRef, where("userId", "==", user.uid), where("productId", "==", product.id));
+      const existing = await getDocs(q);
+
+      if (!existing.empty) {
+        alert("Item is already in your selections.");
+        return;
+      }
+
+      await addDoc(cartRef, {
+        userId: user.uid,
+        productId: product.id,
+        productName: product.name,
+        brand: product.brand,
+        price: product.price,
+        createdAt: serverTimestamp()
+      });
+
+      alert("Added to My Selections!");
+    } catch (error) {
+      console.error("Add to cart error:", error);
+    }
+  };
 
   if (!product) {
     return <div className="view-product">Loading product details...</div>;
@@ -97,8 +144,15 @@ const ViewProduct = () => {
             </p>
           </details>
 
-          {/* ✅ Reserve Button */}
-          <button className="reserve-button">Reserve Now</button>
+          {/* ✅ Buttons */}
+          <div className="button-row">
+            <button className="reserve-button" onClick={handleReserveClick}>
+              Reserve Now
+            </button>
+            <button className="icon-button" onClick={handleAddToCart} title="Add to My Selections">
+              <FiShoppingCart size={24} />
+            </button>
+          </div>
         </div>
       </div>
     </div>

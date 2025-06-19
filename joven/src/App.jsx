@@ -15,6 +15,7 @@ import { auth, db } from './firebase';
 import LandingPage from './pages/LandingPage';
 import Register from './pages/Register';
 import ViewProduct from './components/ViewProduct';
+import ReservationPage from './components/ReservationPage'; // ✅ Added
 
 // Admin Pages
 import AdminDashboard from './pages/admin-page/AdminDashboard';
@@ -60,11 +61,9 @@ const ProtectedRoute = ({ role, children }) => {
       }
 
       try {
-        // Try admin
         let ref = doc(db, 'users', user.uid);
         let snap = await getDoc(ref);
 
-        // If not found in users, try staff
         if (!snap.exists()) {
           ref = doc(db, 'staff', user.uid);
           snap = await getDoc(ref);
@@ -94,7 +93,7 @@ const ProtectedRoute = ({ role, children }) => {
   return granted ? children : null;
 };
 
-// ✅ Helper wrapper to pass pathname as origin
+// ✅ Wrapper to pass pathname as origin
 const WithOrigin = ({ children }) => {
   const location = useLocation();
   return React.cloneElement(children, { origin: location.pathname });
@@ -129,7 +128,22 @@ function App() {
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
 
-        {/* User Profile Route */}
+        {/* ✅ Reservation Page Route */}
+        <Route
+          path="/reserve/:productId"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="User">
+                <ReservationPage />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
+
+        {/* Dashboard from Fitment page (open to all) */}
+        <Route path="/dashboard" element={<UserDashboard />} />
+
+        {/* User Profile Route (auth protected) */}
         <Route
           path="/profile"
           element={
@@ -162,7 +176,7 @@ function App() {
           <Route path="settings" element={<AdminSettings />} />
         </Route>
 
-        {/* User Dashboard */}
+        {/* Authenticated User Dashboard */}
         <Route
           path="/user-dashboard"
           element={
@@ -174,7 +188,7 @@ function App() {
           }
         />
 
-        {/* Staff Dashboard & Pages */}
+        {/* Staff Pages */}
         <Route
           path="/staff-dashboard"
           element={
@@ -195,7 +209,6 @@ function App() {
             </RequireVerifiedEmail>
           }
         />
-
       </Routes>
     </Router>
   );
