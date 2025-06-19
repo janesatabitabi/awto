@@ -5,7 +5,8 @@ import {
   query,
   where,
   doc,
-  setDoc
+  setDoc,
+  deleteDoc
 } from 'firebase/firestore';
 import {
   createUserWithEmailAndPassword,
@@ -23,7 +24,7 @@ const Staffs = () => {
   });
   const [loading, setLoading] = useState(false);
 
-  // Fetch staff users from Firestore where role === 'Staff'
+  // ✅ Fetch staff users from Firestore
   const fetchStaffs = async () => {
     try {
       const usersRef = collection(db, 'users');
@@ -41,6 +42,7 @@ const Staffs = () => {
     fetchStaffs();
   }, []);
 
+  // ✅ Input change handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewStaff(prev => ({
@@ -49,12 +51,12 @@ const Staffs = () => {
     }));
   };
 
+  // ✅ Add staff handler
   const handleAddStaff = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // ✅ Step 1: Create user using secondaryAuth
       const userCredential = await createUserWithEmailAndPassword(
         secondaryAuth,
         newStaff.email,
@@ -62,10 +64,8 @@ const Staffs = () => {
       );
       const newUser = userCredential.user;
 
-      // ✅ Step 2: Send email verification
       await sendEmailVerification(newUser);
 
-      // ✅ Step 3: Save staff data to Firestore
       await setDoc(doc(db, 'users', newUser.uid), {
         name: newStaff.name,
         email: newStaff.email,
@@ -84,6 +84,21 @@ const Staffs = () => {
     }
   };
 
+  // ✅ Delete staff handler
+  const handleDeleteStaff = async (uid) => {
+    const confirm = window.confirm('Are you sure you want to delete this staff?');
+    if (!confirm) return;
+
+    try {
+      await deleteDoc(doc(db, 'users', uid));
+      await fetchStaffs();
+      alert('✅ Staff deleted successfully.');
+    } catch (error) {
+      console.error('Error deleting staff:', error);
+      alert('❌ Failed to delete staff.');
+    }
+  };
+
   return (
     <div className="staff-container">
       <div className="staff-header">
@@ -91,6 +106,7 @@ const Staffs = () => {
       </div>
 
       <div className="staff-content">
+        {/* Form Section */}
         <div className="staff-form-section">
           <h3>Add New Staff</h3>
           <form className="staff-form" onSubmit={handleAddStaff}>
@@ -125,6 +141,7 @@ const Staffs = () => {
           </form>
         </div>
 
+        {/* List Section */}
         <div className="staff-list-section">
           <h3>Current Staff</h3>
           {staffs.length === 0 ? (
@@ -139,6 +156,12 @@ const Staffs = () => {
                   <div className="staff-info">
                     <strong>{staff.name}</strong>
                     <small>{staff.email}</small>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDeleteStaff(staff.id)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </li>
               ))}
