@@ -1,0 +1,16 @@
+/* =============== STAFF DASHBOARD PAGE =============== */
+.staff-dashboard {
+  padding: 2rem;
+}
+
+.staff-dashboard h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #2563eb; /* Blue-600 */
+  margin-bottom: 1rem;
+}
+
+.staff-dashboard p {
+  font-size: 1rem;
+  color: #4b5563; /* Gray-700 */
+}
