@@ -10,7 +10,7 @@ import '../../styles/UserDashboard.css';
 const UserDashboard = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const initialFilters = location.state || {}; // 
+  const initialFilters = location.state || {};
   const [filters, setFilters] = useState(initialFilters);
 
   const handleLogout = async () => {
@@ -18,7 +18,7 @@ const UserDashboard = () => {
       await signOut(auth);
       navigate('/');
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error('Logout failed:', error);
     }
   };
 
@@ -27,13 +27,15 @@ const UserDashboard = () => {
       <Navbar hideCreateAccount={true} showLogout={true} handleLogout={handleLogout} />
 
       <div className="user-dashboard-container">
-        <p>Select your vehicle and browse fitment-matching products.</p>
+        <p className="dashboard-intro">
+          Select your vehicle and browse fitment-matching products.
+        </p>
 
-        <div style={{ display: 'flex', gap: '2rem', marginTop: '2rem' }}>
-          <div style={{ flex: 1 }}>
-            <Filter onChange={setFilters} initialFilters={initialFilters} /> {/* Optional: Add support for initialFilters */}
+        <div className="dashboard-content">
+          <div className="filter-panel">
+            <Filter onChange={setFilters} />
           </div>
-          <div style={{ flex: 3 }}>
+          <div className="catalog-panel">
             <CatalogBox filters={filters} />
           </div>
         </div>

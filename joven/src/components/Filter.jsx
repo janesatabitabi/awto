@@ -1,84 +1,60 @@
 import React, { useState, useEffect } from "react";
-import "../styles/UserDashboard.css";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "../firebase";
 import "../styles/Filter.css";
 
-const WHEEL_TIRE_FILTERS = [
-  {
-    name: "brand",
-    label: "Brand",
-    options: [
-      "ARIVO", "ACCELERA", "ADVANCE MIX", "ALLIANCE", "ALTURA",
-      "AMP", "ARISUN", "BF GOODRICH", "BRIDGESTONE", "CST",
-    ],
-    multiSelect: true,
-  },
-  {
-    name: "diameter",
-    label: "Diameter",
-    options: ['14"', '15"', '16"', '17"', '18"', '19"', '20"', '22"'],
-    multiSelect: true,
-  },
-  {
-    name: "width",
-    label: "Width",
-    options: ['6"', '7"', '8"', '9"', '10"', '12"'],
-    multiSelect: true,
-  },
-  {
-    name: "boltPattern",
-    label: "Bolt Pattern",
-    options: ["4x100", "5x114.3", "5x120", "6x139.7"],
-    multiSelect: true,
-  },
-  {
-    name: "offset",
-    label: "Offset",
-    options: ["+20", "+25", "+30", "+35", "+40"],
-    multiSelect: true,
-  },
-  {
-    name: "lugCount",
-    label: "Lug Count",
-    options: ["4", "5", "6"],
-    multiSelect: true,
-  },
-  {
-    name: "material",
-    label: "Material",
-    options: [
-      "Cast Aluminum", "Flow Formed Aluminum", "Forged Aluminum", "Steel",
-    ],
-    multiSelect: true,
-  },
-  {
-    name: "finish",
-    label: "Finish",
-    options: ["Gloss Black", "Matte Black", "Chrome", "Silver", "Gunmetal"],
-    multiSelect: true,
-  },
-  {
-    name: "new",
-    label: "New",
-    options: ["Yes"],
-    multiSelect: false,
-  },
-  {
-    name: "price",
-    label: "Price Range",
-    options: [" ₱0 -  ₱100", " ₱100 -  ₱200", " ₱200 -  ₱300", " ₱300+"],
-    multiSelect: false,
-  },
-];
-
 const Filter = ({ onChange }) => {
-  const [expanded, setExpanded] = useState([]);
+  const [filtersData, setFiltersData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [expanded, setExpanded] = useState([]);
   const [searchTerms, setSearchTerms] = useState({});
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
+  // Fetch unique filter values from Firestore
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "products"), (snapshot) => {
+      const products = snapshot.docs.map((doc) => doc.data());
+
+      const uniqueValues = {
+        brand: new Set(),
+        model: new Set(),
+        size: new Set(),
+        type: new Set(),
+        price: new Set(),
+      };
+
+      products.forEach((product) => {
+        if (product.brand) uniqueValues.brand.add(product.brand.trim());
+        if (product.model) uniqueValues.model.add(product.model.trim());
+        if (product.size) uniqueValues.size.add(product.size.trim());
+        if (product.type) uniqueValues.type.add(product.type.trim());
+        if (product.price) {
+          const price = parseInt(product.price);
+          if (!isNaN(price)) {
+            if (price <= 1000) uniqueValues.price.add("₱0 - ₱1,000");
+            else if (price <= 2000) uniqueValues.price.add("₱1,001 - ₱2,000");
+            else if (price <= 3000) uniqueValues.price.add("₱2,001 - ₱3,000");
+            else uniqueValues.price.add("₱3,000+");
+          }
+        }
+      });
+
+      setFiltersData([
+        { name: "brand", label: "Brand", options: Array.from(uniqueValues.brand), multiSelect: true },
+        { name: "model", label: "Model", options: Array.from(uniqueValues.model), multiSelect: true },
+        { name: "size", label: "Size", options: Array.from(uniqueValues.size), multiSelect: true },
+        { name: "type", label: "Type", options: Array.from(uniqueValues.type), multiSelect: true },
+        { name: "price", label: "Price", options: Array.from(uniqueValues.price), multiSelect: false },
+      ]);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  // Send filters to parent
   useEffect(() => {
     const filtersToSend = Object.fromEntries(
-      Object.entries(selectedFilters).map(([key, set]) => [key, Array.from(set)])
+      Object.entries(selectedFilters).map(([key, valueSet]) => [key, Array.from(valueSet)])
     );
     onChange && onChange(filtersToSend);
   }, [selectedFilters, onChange]);
@@ -106,14 +82,6 @@ const Filter = ({ onChange }) => {
     });
   };
 
-  const clearFilter = (filterName) => {
-    setSelectedFilters((prev) => {
-      const copy = { ...prev };
-      delete copy[filterName];
-      return copy;
-    });
-  };
-
   const clearAll = () => {
     setSelectedFilters({});
   };
@@ -124,21 +92,15 @@ const Filter = ({ onChange }) => {
 
   return (
     <>
-      <button
-        className="filter-toggle-btn"
-        onClick={() => setIsMobileOpen(true)}
-      >
+      <button className="filter-toggle-btn" onClick={() => setIsMobileOpen(true)}>
         Filters
       </button>
 
-      <div
-        className={`filter-overlay ${isMobileOpen ? "visible" : ""}`}
-        onClick={() => setIsMobileOpen(false)}
-      ></div>
+      <div className={`filter-overlay ${isMobileOpen ? "visible" : ""}`} onClick={() => setIsMobileOpen(false)} />
 
       <div className={`filters ${isMobileOpen ? "open" : ""}`}>
         <div className="filters-header">
-          <h3>Active Filters ({Object.keys(selectedFilters).length})</h3>
+          <h3>Filters</h3>
           {Object.keys(selectedFilters).length > 0 && (
             <button onClick={clearAll} className="clear-btn">
               Clear All
@@ -146,15 +108,11 @@ const Filter = ({ onChange }) => {
           )}
         </div>
 
-        <button
-          className="clear-btn"
-          style={{ marginBottom: "10px" }}
-          onClick={() => setIsMobileOpen(false)}
-        >
+        <button className="clear-btn" onClick={() => setIsMobileOpen(false)} style={{ marginBottom: "10px" }}>
           ✕ Close
         </button>
 
-        {WHEEL_TIRE_FILTERS.map(({ name, label, options, multiSelect }) => {
+        {filtersData.map(({ name, label, options, multiSelect }) => {
           const isExpanded = expanded.includes(name);
           const selectedSet = selectedFilters[name] || new Set();
           const search = searchTerms[name] || "";
@@ -176,38 +134,20 @@ const Filter = ({ onChange }) => {
                 aria-expanded={isExpanded}
               >
                 <span>{label}</span>
-                <button
-                  className="clear-btn"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    clearFilter(name);
-                  }}
-                  aria-label={`Clear filter ${label}`}
-                  disabled={selectedSet.size === 0}
-                >
-                  &times;
-                </button>
-                <span>{isExpanded ? "-" : "+"}</span>
+                <span>{isExpanded ? "−" : "+"}</span>
               </div>
 
               {isExpanded && (
-                <div
-                  className="filter-content"
-                  role="group"
-                  aria-label={`${label} filter options`}
-                >
+                <div className="filter-content" role="group" aria-label={`${label} filter options`}>
                   {options.length > 5 && (
                     <input
                       type="text"
                       placeholder={`Search ${label}...`}
                       className="filter-search"
                       value={search}
-                      onChange={(e) =>
-                        handleSearchChange(name, e.target.value)
-                      }
+                      onChange={(e) => handleSearchChange(name, e.target.value)}
                     />
                   )}
-
                   {filteredOptions.map((option) => {
                     const selected = selectedSet.has(option);
                     return (
@@ -223,7 +163,6 @@ const Filter = ({ onChange }) => {
                       </div>
                     );
                   })}
-
                   {filteredOptions.length === 0 && <p>No options found.</p>}
                 </div>
               )}

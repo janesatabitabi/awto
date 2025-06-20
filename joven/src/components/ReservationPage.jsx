@@ -36,6 +36,7 @@ const ReservationPage = () => {
   const [reservedTimes, setReservedTimes] = useState([]);
 
   const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
+  const downpayment = 500; // constant for display and submission
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -74,11 +75,9 @@ const ReservationPage = () => {
           where("isCancelled", "==", false)
         );
         const snapshot = await getDocs(q);
-        const takenTimes = [];
-        snapshot.forEach((doc) => {
-          const time = doc.data().preferredDateTime.split(" ")[1];
-          takenTimes.push(time);
-        });
+        const takenTimes = snapshot.docs.map((doc) =>
+          doc.data().preferredDateTime.split(" ")[1]
+        );
         setReservedTimes(takenTimes);
       } catch (error) {
         console.error("Error fetching time slots:", error);
@@ -100,18 +99,27 @@ const ReservationPage = () => {
       return alert("Please complete all required fields.");
     }
 
+    // Validate required product fields
+    if (!product || !product.brand || !product.size) {
+      console.error("❌ Incomplete product data:", product);
+      return alert("Product information is incomplete.");
+    }
+
+    // Safely compose productName with fallback
+    const productName = `${product.brand || ""} ${product.model || ""} ${product.size || ""}`.trim();
+
     const formattedDate = preferredDate.toLocaleDateString("en-CA");
     const fullDateTime = `${formattedDate} ${preferredTime}`;
     const price = Number(product.price || 0);
-    const downpayment = 500; // ✅ Fixed downpayment
 
     const reservationData = {
       userId: user.uid,
       productId: product.id,
-      productName: product.name,
+      productName,
       brand: product.brand,
-      type: product.type,
+      model: product.model || "",
       size: product.size,
+      type: product.type || "",
       price,
       downpayment,
       serviceType,
@@ -128,11 +136,12 @@ const ReservationPage = () => {
     };
 
     try {
-      await addDoc(collection(db, "reservations"), reservationData);
-      alert("Reservation submitted! Redirecting to My Selections...");
-      navigate("/my-selections");
+      console.log("🚀 Submitting reservation:", reservationData);
+      const resRef = await addDoc(collection(db, "reservations"), reservationData);
+      alert("Reservation submitted! Redirecting to invoice...");
+      navigate(`/invoice/${resRef.id}`);
     } catch (err) {
-      console.error("Reservation error:", err);
+      console.error("❌ Reservation error:", err);
       alert("Something went wrong. Please try again.");
     }
   };
@@ -143,11 +152,11 @@ const ReservationPage = () => {
   return (
     <div className="reservation-page">
       <button className="back-button" onClick={() => navigate(-1)}>← Back</button>
-      <h2>Reserve: {product.name}</h2>
+      <h2>Reserve: {product.brand} {product.model} {product.size}</h2>
 
       <div className="reservation-form">
         <h3 style={{ marginBottom: "0.5rem", color: "#1f2937" }}>
-          Product Name: {product.brand} {product.model} {product.size}
+          Product: {product.brand} {product.model} {product.size}
         </h3>
 
         <label>Service Type</label>
@@ -212,7 +221,7 @@ const ReservationPage = () => {
 
         <div className="price-summary">
           <p><strong>Price:</strong> ₱{product.price}</p>
-          <p><strong>Downpayment:</strong> ₱500</p>
+          <p><strong>Downpayment:</strong> ₱{downpayment}</p>
         </div>
 
         <button className="submit-btn" onClick={handleSubmit}>
