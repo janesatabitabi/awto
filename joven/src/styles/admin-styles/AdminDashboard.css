@@ -84,10 +84,3 @@
   overflow-y: auto;
 }
 
-.admin-page-wrapper {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-  height: 100%;
-}

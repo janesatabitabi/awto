@@ -1,0 +1,109 @@
+/* Main dashboard container */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+  padding: 2rem;
+  background-color: #f3f4f6;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Header with centered title */
+.dashboard-header {
+  width: 100%;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+/* Grid layout for summary cards */
+.summary-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 3 cards per row */
+  gap: 1.5rem;
+  justify-items: center; /* Center each card in its grid column */
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 1024px) {
+  .summary-cards-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cards per row on medium screens */
+  }
+}
+
+@media (max-width: 640px) {
+  .summary-cards-grid {
+    grid-template-columns: 1fr; /* 1 card per row on small screens */
+  }
+}
+
+/* Individual summary card */
+.card {
+  background-color: white;
+  width: 280px;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Card text section */
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.card-label {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.card-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.card-subtext {
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+.positive-change {
+  color: #10b981;
+}
+
+.negative-change {
+  color: #ef4444;
+}
+
+/* Icon side of the card */
+.card-icon-wrapper {
+  font-size: 1.5rem;
+  border-radius: 50%;
+  padding: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.card-icon-text {
+  font-size: 1.75rem;
+}
+
+/* Background color classes for cards */
+.purple-bg { background-color: #f5f3ff; }
+.green-bg { background-color: #ecfdf5; }
+.yellow-bg { background-color: #fefce8; }
+.blue-bg   { background-color: #eff6ff; }
+.pink-bg   { background-color: #fdf2f8; }
+.red-bg    { background-color: #fee2e2; }

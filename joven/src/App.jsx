@@ -25,6 +25,7 @@ import AdminStaffs from './pages/admin-page/Staffs';
 import AdminReservations from './pages/admin-page/Reservations';
 import AdminCustomers from './pages/admin-page/Customers';
 import AdminSettings from './pages/admin-page/Settings';
+import AdminDashboardContent from './pages/admin-page/AdminDashboardContent';
 
 // User Pages
 import UserDashboard from './pages/user-page/UserDashboard';
@@ -174,7 +175,7 @@ export default function App() {
             </RequireVerifiedEmail>
           }
         >
-          <Route path="admindashboard" element={<AdminDashboard />} />
+          <Route index element={<AdminDashboardContent />} />
           <Route path="sales" element={<AdminSales />} />
           <Route path="inventory" element={<AdminInventory />} />
           <Route path="products" element={<AdminProducts />} />
