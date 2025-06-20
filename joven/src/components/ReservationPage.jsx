@@ -144,7 +144,12 @@ const ReservationPage = () => {
     <div className="reservation-page">
       <button className="back-button" onClick={() => navigate(-1)}>← Back</button>
       <h2>Reserve: {product.name}</h2>
+
       <div className="reservation-form">
+        <h3 style={{ marginBottom: "0.5rem", color: "#1f2937" }}>
+          Product Name: {product.brand} {product.model} {product.size}
+        </h3>
+
         <label>Service Type</label>
         <select value={serviceType} onChange={(e) => setServiceType(e.target.value)}>
           <option>Installation</option>

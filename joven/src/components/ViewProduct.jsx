@@ -18,7 +18,7 @@ const ViewProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
-  const [mainImage, setMainImage] = useState("");
+  const [mainImage, setMainImage] = useState(null); // ✅ FIXED from ""
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -28,7 +28,7 @@ const ViewProduct = () => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setProduct({ ...data, id: docSnap.id });
-          setMainImage(data.images?.[0] || data.imageUrl || "");
+          setMainImage(data.images?.[0] || data.imageUrl || null); // ✅ FIXED
         } else {
           console.error("Product not found");
         }
@@ -83,9 +83,10 @@ const ViewProduct = () => {
     return <div className="view-product">Loading product details...</div>;
   }
 
-  const displayName = product.size && product.model
-    ? `${product.size} ${product.model}`
-    : product.name;
+  const displayName =
+    product.size && product.model
+      ? `${product.size} ${product.model}`
+      : product.name || "No Name";
 
   return (
     <div className="view-product">
@@ -96,14 +97,23 @@ const ViewProduct = () => {
       <div className="product-container">
         {/* Images */}
         <div className="product-images">
-          <img
-            src={mainImage || "https://placehold.co/300x300?text=No+Image"}
-            alt="Main"
-            className="main-image"
-            onError={(e) =>
-              (e.target.src = "https://placehold.co/300x300?text=No+Image")
-            }
-          />
+          {mainImage ? (
+            <img
+              src={mainImage}
+              alt="Main"
+              className="main-image"
+              onError={(e) =>
+                (e.target.src = "https://placehold.co/300x300?text=No+Image")
+              }
+            />
+          ) : (
+            <img
+              src="https://placehold.co/300x300?text=No+Image"
+              alt="No Image"
+              className="main-image"
+            />
+          )}
+
           <div className="thumbnail-row">
             {(product.images || []).map((img, index) => (
               <img
