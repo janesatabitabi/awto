@@ -29,8 +29,9 @@ import AdminSettings from './pages/admin-page/Settings';
 // User Pages
 import UserDashboard from './pages/user-page/UserDashboard';
 import UserProfile from './pages/user-page/UserProfile';
+import InvoicePage from './pages/user-page/InvoicePage'; // ✅ IMPORTED HERE
 
-// Reservation Page (✅ Correct import path from components)
+// Reservation Page
 import ReservationPage from './components/ReservationPage';
 
 // Staff Pages
@@ -50,7 +51,7 @@ const Spinner = () => (
   </div>
 );
 
-// ProtectedRoute: ensures auth, email verification, and correct role
+// ProtectedRoute
 const ProtectedRoute = ({ role, children }) => {
   const [loading, setLoading] = useState(true);
   const [granted, setGranted] = useState(false);
@@ -130,12 +131,25 @@ export default function App() {
         />
         <Route path="/verify" element={<Verify />} />
         <Route path="/view-product/:id" element={<ViewProduct />} />
+
         <Route
           path="/reserve/:productId"
           element={
             <RequireVerifiedEmail>
               <ProtectedRoute role="User">
                 <ReservationPage />
+              </ProtectedRoute>
+            </RequireVerifiedEmail>
+          }
+        />
+
+        {/* ✅ Invoice Route */}
+        <Route
+          path="/invoice/:reservationId"
+          element={
+            <RequireVerifiedEmail>
+              <ProtectedRoute role="User">
+                <InvoicePage />
               </ProtectedRoute>
             </RequireVerifiedEmail>
           }
@@ -225,6 +239,9 @@ export default function App() {
             </RequireVerifiedEmail>
           }
         />
+
+        {/* Fallback 404 */}
+        <Route path="*" element={<div className="text-center p-10">404 - Page Not Found</div>} />
       </Routes>
     </Router>
   );

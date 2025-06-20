@@ -3,32 +3,55 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../../firebase";
-import "../styles/InvoicePage.css";
-
+import "../../styles/Invoice.css";
 
 const InvoicePage = () => {
   const { reservationId } = useParams();
   const navigate = useNavigate();
-  const [reservation, setReservation] = useState(null);
+  const [reservation, setReservation] = useState(undefined); // can be undefined | null | object
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
+        console.log("📥 Fetching reservation for ID:", reservationId);
         const docRef = doc(db, "reservations", reservationId);
         const docSnap = await getDoc(docRef);
+
         if (docSnap.exists()) {
+          console.log("✅ Reservation found:", docSnap.data());
           setReservation(docSnap.data());
         } else {
+          console.warn("⚠️ Reservation not found.");
           setReservation(null);
         }
       } catch (error) {
-        console.error("Error fetching invoice:", error);
+        console.error("❌ Error fetching reservation:", error);
+        setReservation(null);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchInvoice();
+
+    if (reservationId) {
+      fetchInvoice();
+    }
   }, [reservationId]);
 
-  if (!reservation) return <div className="invoice-page">Loading invoice...</div>;
+  if (loading) {
+    return <div className="invoice-page">Loading invoice...</div>;
+  }
+
+  if (reservation === null) {
+    return (
+      <div className="invoice-page">
+        <h2>Reservation not found.</h2>
+        <button className="back-button" onClick={() => navigate(-1)}>
+          ← Back
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="invoice-page">
@@ -58,7 +81,7 @@ const InvoicePage = () => {
 
         <h3>Payment Details</h3>
         <p><strong>Total Price:</strong> ₱{reservation.price}</p>
-        <p><strong>Downpayment (30%):</strong> ₱{reservation.downpayment}</p>
+        <p><strong>Downpayment:</strong> ₱{reservation.downpayment}</p>
         <p><strong>Payment Method:</strong> {reservation.paymentMethod}</p>
 
         <hr />
