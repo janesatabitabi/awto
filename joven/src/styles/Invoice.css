@@ -1,0 +1,56 @@
+/* src/styles/invoice.css */
+.invoice-page {
+  display: flex;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Georgia', serif;
+  background-color: #f0f0f0;
+  min-height: 100vh;
+}
+
+.invoice-box {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #ccc;
+}
+
+.invoice-box h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+  font-size: 24px;
+  color: #222;
+}
+
+.invoice-box h3 {
+  margin-top: 1.5rem;
+  color: #444;
+}
+
+.invoice-box p {
+  margin: 0.3rem 0;
+  font-size: 15px;
+}
+
+.invoice-box hr {
+  margin: 1.2rem 0;
+  border: none;
+  border-top: 1px solid #ccc;
+}
+
+.back-button {
+  margin-top: 1.5rem;
+  padding: 0.5rem 1.2rem;
+  background-color: #333;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  background-color: #555;
+}
