@@ -1,68 +1,73 @@
+/* src/styles/admin-styles/Customers.css */
+
 .customers-container {
-  padding: 2rem;
-  font-family: 'Inter', sans-serif;
+  padding: 1.5rem;
   background-color: #f9fafb;
+  font-family: 'Inter', sans-serif;
 }
 
 .customers-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
 .customers-header h1 {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
+  font-weight: bold;
   color: #1f2937;
 }
 
 .customers-search {
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 1rem;
   border: 1px solid #d1d5db;
-  border-radius: 8px;
+  border-radius: 0.375rem;
   font-size: 1rem;
-  width: 250px;
 }
 
 .customers-table-wrapper {
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
   overflow-x: auto;
 }
 
 .customers-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.95rem;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .customers-table th,
 .customers-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.75rem;
   text-align: left;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.customers-table th {
+  background-color: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
 }
 
 .avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #6366f1;
+  background-color: #3b82f6;
   color: white;
-  font-weight: bold;
-  font-size: 1.1rem;
-  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .status-badge {
-  padding: 0.3rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  display: inline-block;
 }
 
 .status-badge.active {
@@ -78,19 +83,21 @@
 .delete-btn {
   background-color: #ef4444;
   color: white;
-  padding: 0.5rem 0.8rem;
   border: none;
-  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.375rem;
   cursor: pointer;
-  transition: background 0.3s ease;
+  font-size: 0.875rem;
 }
 
 .delete-btn:hover {
   background-color: #dc2626;
 }
 
-.text-center {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
+@media (min-width: 640px) {
+  .customers-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
 }
