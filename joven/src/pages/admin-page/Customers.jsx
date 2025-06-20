@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+// src/pages/admin-page/Customers.jsx
+import React, { useEffect, useState } from 'react';
+import { db } from '../../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 import '../../styles/admin-styles/Customers.css';
 
 const AdminCustomers = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [customers, setCustomers] = useState([]);
 
-  // Sample static data (for UI purposes)
-  const customers = [
-    { id: 1, name: 'Juan Dela Cruz', email: 'juan@email.com', status: 'Active' },
-    { id: 2, name: 'Maria Santos', email: 'maria@email.com', status: 'Inactive' },
-    { id: 3, name: 'Pedro Ramirez', email: 'pedro@email.com', status: 'Active' },
-  ];
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'users'), (snapshot) => {
+      const list = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setCustomers(list);
+    });
+
+    return () => unsub();
+  }, []);
 
   const filtered = customers.filter(c =>
     `${c.name} ${c.email}`.toLowerCase().includes(searchTerm.toLowerCase())
@@ -49,14 +58,14 @@ const AdminCustomers = () => {
                 <tr key={customer.id}>
                   <td>
                     <div className="avatar">
-                      {customer.name.charAt(0).toUpperCase()}
+                      {customer.name?.charAt(0).toUpperCase()}
                     </div>
                   </td>
-                  <td>{customer.name}</td>
-                  <td>{customer.email}</td>
+                  <td>{customer.name || '—'}</td>
+                  <td>{customer.email || '—'}</td>
                   <td>
-                    <span className={`status-badge ${customer.status.toLowerCase()}`}>
-                      {customer.status}
+                    <span className={`status-badge ${customer.status?.toLowerCase() || 'inactive'}`}>
+                      {customer.status || 'Inactive'}
                     </span>
                   </td>
                   <td>
