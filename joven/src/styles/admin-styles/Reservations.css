@@ -201,3 +201,14 @@
     padding: 0.5rem;
   }
 }
+
+.reset-btn {
+  background-color: #f59e0b;
+  border: none;
+  padding: 0.6rem 1rem;
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  margin-left: 1rem;
+  cursor: pointer;
+}

@@ -3,12 +3,13 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   doc,
   getDoc,
-  addDoc,
+  setDoc,
   collection,
   getDocs,
   query,
   where,
   serverTimestamp,
+  runTransaction,
 } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../firebase";
@@ -36,7 +37,27 @@ const ReservationPage = () => {
   const [reservedTimes, setReservedTimes] = useState([]);
 
   const timeSlots = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00"];
-  const downpayment = 500; // constant for display and submission
+  const downpayment = 500;
+
+  // ✅ Custom ID generator
+  const generateReservationId = async () => {
+    const counterRef = doc(db, "counters", "reservations");
+
+    const newId = await runTransaction(db, async (transaction) => {
+      const counterSnap = await transaction.get(counterRef);
+      if (!counterSnap.exists()) throw new Error("Counter document not found");
+
+      const lastId = counterSnap.data().lastId || 0;
+      const nextId = lastId + 1;
+
+      transaction.update(counterRef, { lastId: nextId });
+
+      const padded = String(nextId).padStart(5, "0");
+      return `RES${padded}`;
+    });
+
+    return newId;
+  };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -99,47 +120,46 @@ const ReservationPage = () => {
       return alert("Please complete all required fields.");
     }
 
-    // Validate required product fields
     if (!product || !product.brand || !product.size) {
       console.error("❌ Incomplete product data:", product);
       return alert("Product information is incomplete.");
     }
 
-    // Safely compose productName with fallback
     const productName = `${product.brand || ""} ${product.model || ""} ${product.size || ""}`.trim();
-
     const formattedDate = preferredDate.toLocaleDateString("en-CA");
     const fullDateTime = `${formattedDate} ${preferredTime}`;
     const price = Number(product.price || 0);
 
-    const reservationData = {
-      userId: user.uid,
-      productId: product.id,
-      productName,
-      brand: product.brand,
-      model: product.model || "",
-      size: product.size,
-      type: product.type || "",
-      price,
-      downpayment,
-      serviceType,
-      vehicleBrand,
-      vehicleModel,
-      vehicleYear,
-      plateNumber,
-      preferredDateTime: fullDateTime,
-      note,
-      paymentMethod: "PayMongo",
-      status: "Pending Payment",
-      isCancelled: false,
-      createdAt: serverTimestamp(),
-    };
-
     try {
-      console.log("🚀 Submitting reservation:", reservationData);
-      const resRef = await addDoc(collection(db, "reservations"), reservationData);
+      const reservationId = await generateReservationId(); // ✅ use custom ID
+
+      const reservationData = {
+        id: reservationId, // ✅ stored inside document
+        userId: user.uid,
+        productId: product.id,
+        productName,
+        brand: product.brand,
+        model: product.model || "",
+        size: product.size,
+        type: product.type || "",
+        price,
+        downpayment,
+        serviceType,
+        vehicleBrand,
+        vehicleModel,
+        vehicleYear,
+        plateNumber,
+        preferredDateTime: fullDateTime,
+        note,
+        paymentMethod: "PayMongo",
+        status: "Pending Payment",
+        isCancelled: false,
+        createdAt: serverTimestamp(),
+      };
+
+      await setDoc(doc(db, "reservations", reservationId), reservationData);
       alert("Reservation submitted! Redirecting to invoice...");
-      navigate(`/invoice/${resRef.id}`);
+      navigate(`/invoice/${reservationId}`);
     } catch (err) {
       console.error("❌ Reservation error:", err);
       alert("Something went wrong. Please try again.");
