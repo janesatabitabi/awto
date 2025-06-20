@@ -1,47 +1,101 @@
+/* src/styles/PaymentPage.css */
+
 .payment-page {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to right, #f5f7fa, #e8ecf1);
   padding: 2rem;
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #fafafa;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.payment-page h2 {
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  text-align: center;
 }
 
 .payment-card {
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   padding: 2rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 650px;
+  color: #34495e;
   margin-bottom: 2rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .payment-card p {
+  font-size: 1rem;
   margin: 0.5rem 0;
 }
 
-.pay-button {
-  background: #ff0077;
-  color: white;
-  padding: 0.75rem 2rem;
+.payment-card strong {
+  color: #2c3e50;
+}
+
+.pay-button,
+.cancel-btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
   border: none;
-  border-radius: 0.75rem;
-  font-size: 1.1rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 300px;
+  margin-bottom: 1rem;
+}
+
+.pay-button {
+  background-color: #27ae60;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .pay-button:hover {
-  background: #e6006b;
+  background-color: #219150;
+}
+
+.pay-button:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .cancel-btn {
-  margin-top: 1rem;
-  background: none;
-  border: none;
-  color: #555;
-  text-decoration: underline;
-  cursor: pointer;
+  background-color: #ffffff;
+  color: #7f8c8d;
+  border: 1px solid #ccc;
+}
+
+.cancel-btn:hover {
+  background-color: #ecf0f1;
+}
+
+@media (max-width: 640px) {
+  .payment-card {
+    padding: 1.5rem;
+  }
+
+  .pay-button,
+  .cancel-btn {
+    width: 100%;
+  }
 }
