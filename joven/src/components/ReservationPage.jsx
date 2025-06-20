@@ -103,7 +103,7 @@ const ReservationPage = () => {
     const formattedDate = preferredDate.toLocaleDateString("en-CA");
     const fullDateTime = `${formattedDate} ${preferredTime}`;
     const price = Number(product.price || 0);
-    const downpayment = Math.floor(price * 0.3);
+    const downpayment = 500; // ✅ Fixed downpayment
 
     const reservationData = {
       userId: user.uid,
@@ -212,7 +212,7 @@ const ReservationPage = () => {
 
         <div className="price-summary">
           <p><strong>Price:</strong> ₱{product.price}</p>
-          <p><strong>Downpayment:</strong> ₱{Math.floor(product.price * 0.3)}</p>
+          <p><strong>Downpayment:</strong> ₱500</p>
         </div>
 
         <button className="submit-btn" onClick={handleSubmit}>
