@@ -3,10 +3,11 @@ html {
   scroll-behavior: smooth;
 }
 
+
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: #f5f6fa;
   color: #2d3436;
 }
@@ -121,6 +122,51 @@ body {
   margin: 0 auto;
   text-align: center;
 }
+
+/* ================= BRAND CATALOG SECTION ================= */
+/* ================= BRAND CATALOG SECTION ================= */
+.brand-catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+  padding: 0 2rem;
+}
+
+.brand-card {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 220px;
+}
+
+.brand-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.15);
+}
+
+.brand-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  margin-bottom: 1rem;
+}
+
+.brand-card p {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2d3436;
+  margin: 0;
+}
+
 
 /* ================= POPUP FORM ================= */
 .login-popup-overlay {
@@ -389,72 +435,12 @@ body {
   .fitment-button {
     width: 100%;
   }
-}
 
-/* ================= OPTIONAL LOGIN PAGE STYLES ================= */
-.login-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 4rem 1rem;
-}
+  .brand-card img {
+    width: 70px;
+  }
 
-.login-box {
-  width: 100%;
-  max-width: 420px;
-  background-color: #fff;
-  padding: 2.5rem;
-  border-radius: 15px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-  text-align: center;
-}
-
-.login-form-content input {
-  width: 100%;
-  padding: 0.75rem;
-  margin-top: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-}
-
-.password-input {
-  position: relative;
-}
-
-.password-input .toggle-password {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
-
-.google-btn {
-  width: 100%;
-  padding: 0.75rem;
-  background-color: #4285f4;
-  color: #fff;
-  font-weight: 500;
-  border: none;
-  border-radius: 8px;
-  margin-top: 1rem;
-  cursor: pointer;
-}
-
-.separator {
-  margin: 1.5rem 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.separator span {
-  padding: 0 1rem;
-  color: #888;
-}
-
-.login-note {
-  font-size: 0.875rem;
-  margin-top: 1rem;
-  color: #666;
+  .brand-card p {
+    font-size: 0.9rem;
+  }
 }

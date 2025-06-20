@@ -203,3 +203,27 @@
     font-size: 1rem;
   }
 }
+
+.user-dashboard-container {
+  padding: 2rem;
+}
+
+.dashboard-intro {
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.dashboard-content {
+  display: flex;
+  gap: 2rem;
+}
+
+.filter-panel {
+  flex: 1;
+  min-width: 220px;
+}
+
+.catalog-panel {
+  flex: 3;
+}
