@@ -8,25 +8,22 @@ import "../../styles/Invoice.css";
 const InvoicePage = () => {
   const { reservationId } = useParams();
   const navigate = useNavigate();
-  const [reservation, setReservation] = useState(undefined); // can be undefined | null | object
+  const [reservation, setReservation] = useState(undefined);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchInvoice = async () => {
       try {
-        console.log("📥 Fetching reservation for ID:", reservationId);
         const docRef = doc(db, "reservations", reservationId);
         const docSnap = await getDoc(docRef);
 
         if (docSnap.exists()) {
-          console.log("✅ Reservation found:", docSnap.data());
           setReservation(docSnap.data());
         } else {
-          console.warn("⚠️ Reservation not found.");
           setReservation(null);
         }
       } catch (error) {
-        console.error("❌ Error fetching reservation:", error);
+        console.error("Error fetching reservation:", error);
         setReservation(null);
       } finally {
         setLoading(false);
@@ -89,9 +86,18 @@ const InvoicePage = () => {
         <p><strong>Status:</strong> {reservation.status}</p>
         <p><strong>Note:</strong> {reservation.note || "None"}</p>
 
-        <button className="back-button" onClick={() => navigate("/my-selections")}>
-          Back to My Selections
-        </button>
+        <div className="button-group">
+          <button className="back-button" onClick={() => navigate(-1)}>
+            ← Back
+          </button>
+
+          <button
+            className="continue-button"
+            onClick={() => navigate(`/payment/${reservationId}`)}
+          >
+            Continue to Payment →
+          </button>
+        </div>
       </div>
     </div>
   );

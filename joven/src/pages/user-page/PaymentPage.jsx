@@ -1,28 +1,50 @@
+// src/pages/user-page/PaymentPage.jsx
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import "../styles/PaymentPage.css";
+import { useNavigate, useParams } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase";
+import "../../styles/PaymentPage.css";
 
 const PaymentPage = () => {
+  const { reservationId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const reservation = location.state?.reservation;
-
-  const [loading, setLoading] = useState(false);
+  const [reservation, setReservation] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
-    if (!reservation) {
-      alert("No reservation found. Redirecting...");
-      navigate("/my-selections");
-    }
-  }, [reservation, navigate]);
+    const fetchReservation = async () => {
+      try {
+        const docRef = doc(db, "reservations", reservationId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setReservation(docSnap.data());
+        } else {
+          alert("Reservation not found.");
+          navigate("/my-selections");
+        }
+      } catch (err) {
+        console.error("Error fetching reservation:", err);
+        navigate("/my-selections");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReservation();
+  }, [reservationId, navigate]);
 
   const handlePayNow = () => {
-    setLoading(true);
+    setPaying(true);
     setTimeout(() => {
-      alert("Payment successful via PayMongo mock!");
-      navigate("/invoice", { state: { reservation } });
-    }, 2000); // Simulate payment delay
+      alert("✅ Payment successful via PayMongo (mock)");
+      navigate(`/invoice/${reservationId}`);
+    }, 2000); // Simulated delay
   };
+
+  if (loading) {
+    return <div className="payment-page">Loading payment info...</div>;
+  }
 
   if (!reservation) return null;
 
@@ -33,9 +55,9 @@ const PaymentPage = () => {
         <p><strong>Product:</strong> {reservation.productName}</p>
         <p><strong>Brand:</strong> {reservation.brand}</p>
         <p><strong>Vehicle:</strong> {`${reservation.vehicleBrand} ${reservation.vehicleModel} ${reservation.vehicleYear}`}</p>
-        <p><strong>Plate:</strong> {reservation.plateNumber}</p>
+        <p><strong>Plate Number:</strong> {reservation.plateNumber}</p>
         <p><strong>Date & Time:</strong> {reservation.preferredDateTime}</p>
-        <p><strong>Service:</strong> {reservation.serviceType}</p>
+        <p><strong>Service Type:</strong> {reservation.serviceType}</p>
         <p><strong>Total Price:</strong> ₱{reservation.price}</p>
         <p><strong>Downpayment (30%):</strong> ₱{reservation.downpayment}</p>
       </div>
@@ -43,9 +65,9 @@ const PaymentPage = () => {
       <button
         className="pay-button"
         onClick={handlePayNow}
-        disabled={loading}
+        disabled={paying}
       >
-        {loading ? "Processing..." : "Pay Now via PayMongo"}
+        {paying ? "Processing..." : "Pay Now via PayMongo"}
       </button>
 
       <button className="cancel-btn" onClick={() => navigate(-1)}>

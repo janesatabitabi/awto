@@ -108,9 +108,6 @@ const Filter = ({ onChange }) => {
           )}
         </div>
 
-        <button className="clear-btn" onClick={() => setIsMobileOpen(false)} style={{ marginBottom: "10px" }}>
-          ✕ Close
-        </button>
 
         {filtersData.map(({ name, label, options, multiSelect }) => {
           const isExpanded = expanded.includes(name);
