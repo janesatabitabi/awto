@@ -5,7 +5,7 @@ import { FaBars } from 'react-icons/fa';
 import { FiBell, FiShoppingCart } from 'react-icons/fi';
 import jovenLogo from '../assets/jovenlogo.png';
 import { auth, db } from '../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import '../styles/Navbar.css';
 import LoginSection from './LoginSection';
 
@@ -17,10 +17,9 @@ const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
-
+  const [cartCount, setCartCount] = useState(0);
   const dropdownRef = useRef(null);
   const notificationCount = 3; // Placeholder
-  const cartCount = 2; // Placeholder
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
@@ -31,9 +30,14 @@ const Navbar = () => {
         if (docSnap.exists()) {
           setUserData(docSnap.data());
         }
+
+        // Get cart items count
+        const cartRef = collection(db, 'cartSelections');
+        const q = query(cartRef, where('userId', '==', currentUser.uid));
+        const snapshot = await getDocs(q);
+        setCartCount(snapshot.size);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -62,7 +66,6 @@ const Navbar = () => {
   const handleLoginSuccess = (userData) => {
     setUserData(userData);
     setShowLogin(false);
-    // 👇 Navigation is handled inside LoginSection now
   };
 
   return (
@@ -88,9 +91,12 @@ const Navbar = () => {
               <FiBell size={20} />
               {notificationCount > 0 && <span className="badge">{notificationCount}</span>}
             </button>
-            <button className="icon-button" title="My Selections">
+            <button
+              className="icon-button"
+              title="My Selections"
+              onClick={() => navigate("/my-selections")}
+            >
               <FiShoppingCart size={20} />
-              <span className="label">My Selections</span>
               {cartCount > 0 && <span className="badge">{cartCount}</span>}
             </button>
           </div>
@@ -140,7 +146,7 @@ const Navbar = () => {
             <LoginSection
               onClose={() => setShowLogin(false)}
               onLoginSuccess={handleLoginSuccess}
-              origin={location.pathname} // ✅ pass origin
+              origin={location.pathname}
             />
           </div>
         </div>
