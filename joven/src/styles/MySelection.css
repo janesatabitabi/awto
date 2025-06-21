@@ -1,79 +1,96 @@
-/* ================= MY SELECTIONS PAGE ================= */
-.my-selections-page {
-  font-family: 'Segoe UI', sans-serif;
+.my-selections {
   padding: 2rem;
-  background-color: #f9f9f9;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6f8;
   min-height: 100vh;
+  animation: fadeIn 0.5s ease-in;
 }
 
-.my-selections-title {
+.my-selections h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 2rem;
   font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 1.5rem;
-  color: #333;
 }
 
-.reservation-card {
-  background-color: #fff;
-  border-radius: 12px;
+.loading,
+.empty {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  padding-top: 2rem;
+}
+
+.cart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cart-card {
+  background: #ffffff;
   padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transition: all 0.2s ease-in-out;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
 }
 
-.reservation-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+.cart-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
-.reservation-card h3 {
+.cart-card h3 {
+  margin-top: 0;
+  color: #34495e;
   font-size: 1.25rem;
-  font-weight: 600;
-  color: #1e1e1e;
 }
 
-.reservation-info {
-  margin-top: 0.75rem;
-  line-height: 1.6;
+.cart-card p {
+  margin: 0.4rem 0;
   font-size: 0.95rem;
-  color: #444;
+  color: #555;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 0.35rem 0.75rem;
-  border-radius: 8px;
-  font-size: 0.8rem;
+.actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.2rem;
+}
+
+.reserve-btn,
+.remove-btn {
+  border: none;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.9rem;
   font-weight: 600;
-  text-transform: uppercase;
-  margin-top: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.status-pending {
-  background-color: #fff3cd;
-  color: #856404;
+.reserve-btn {
+  background-color: #16a085;
+  color: #fff;
 }
 
-.status-confirmed {
-  background-color: #d4edda;
-  color: #155724;
+.reserve-btn:hover {
+  background-color: #138d75;
 }
 
-.status-cancelled {
-  background-color: #f8d7da;
-  color: #721c24;
+.remove-btn {
+  background-color: #e74c3c;
+  color: #fff;
 }
 
-@media (max-width: 768px) {
-  .my-selections-page {
-    padding: 1rem;
-  }
+.remove-btn:hover {
+  background-color: #c0392b;
+}
 
-  .reservation-card {
-    padding: 1rem;
-  }
-
-  .my-selections-title {
-    font-size: 1.5rem;
-  }
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

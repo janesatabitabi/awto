@@ -96,7 +96,17 @@ const CatalogBox = ({ filters }) => {
               price,
               reviews = [],
               new: isNew,
-            } = product;
+            } = product;566666666666666666666666
+
+
+
+
+
+
+
+
+
+            
 
             return (
               <div key={id} className="product-card" onClick={() => handleView(id)}>

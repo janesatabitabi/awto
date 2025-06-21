@@ -18,7 +18,7 @@ const ViewProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
-  const [mainImage, setMainImage] = useState(null); // ✅ FIXED from ""
+  const [mainImage, setMainImage] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -28,7 +28,7 @@ const ViewProduct = () => {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setProduct({ ...data, id: docSnap.id });
-          setMainImage(data.images?.[0] || data.imageUrl || null); // ✅ FIXED
+          setMainImage(data.images?.[0] || data.imageUrl || null);
         } else {
           console.error("Product not found");
         }
@@ -40,13 +40,20 @@ const ViewProduct = () => {
   }, [id]);
 
   const handleReserveClick = () => {
-    navigate(`/reserve/${product.id}`);
+    if (product?.id) {
+      navigate(`/reserve/${product.id}`);
+    }
   };
 
   const handleAddToCart = async () => {
     const user = auth.currentUser;
     if (!user) {
       alert("You must be logged in to add to selections.");
+      return;
+    }
+
+    if (!product || !product.id) {
+      alert("Product data is not ready.");
       return;
     }
 
@@ -64,18 +71,24 @@ const ViewProduct = () => {
         return;
       }
 
+      const productName =
+        product.name?.trim() ||
+        `${product.size || ""} ${product.model || ""}`.trim() ||
+        "Unnamed Product";
+
       await addDoc(cartRef, {
         userId: user.uid,
         productId: product.id,
-        productName: product.name,
-        brand: product.brand,
-        price: product.price,
+        productName: productName,
+        brand: product.brand || "Unknown",
+        price: typeof product.price === "number" ? product.price : 0,
         createdAt: serverTimestamp(),
       });
 
       alert("Added to My Selections!");
     } catch (error) {
       console.error("Add to cart error:", error);
+      alert("Failed to add to My Selections.");
     }
   };
 
@@ -97,23 +110,15 @@ const ViewProduct = () => {
       <div className="product-container">
         {/* Images */}
         <div className="product-images">
-          {mainImage ? (
-            <img
-              src={mainImage}
-              alt="Main"
-              className="main-image"
-              onError={(e) =>
-                (e.target.src = "https://placehold.co/300x300?text=No+Image")
-              }
-            />
-          ) : (
-            <img
-              src="https://placehold.co/300x300?text=No+Image"
-              alt="No Image"
-              className="main-image"
-            />
-          )}
-
+          <img
+            src={mainImage || "https://placehold.co/300x300?text=No+Image"}
+            alt="Main"
+            className="main-image"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://placehold.co/300x300?text=No+Image";
+            }}
+          />
           <div className="thumbnail-row">
             {(product.images || []).map((img, index) => (
               <img
