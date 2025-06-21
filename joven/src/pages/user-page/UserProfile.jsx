@@ -149,7 +149,10 @@ const UserProfile = () => {
   return (
     <div className="user-profile-page">
       <aside className="profile-sidebar">
-        <button className="back-home" onClick={() => navigate("/")}>← Back to Home</button>
+        <button className="back-home" onClick={() => navigate("/")}>
+          ← Back to Home
+        </button>
+
         <h2>My Account</h2>
         <ul>
           <li className={activeTab === "profile" ? "active" : ""} onClick={() => setActiveTab("profile")}>Profile</li>
