@@ -23,7 +23,6 @@ const Fitment = () => {
     drives: []
   });
 
-  const [suggestedProducts, setSuggestedProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -116,12 +115,8 @@ const Fitment = () => {
       where('drive', '==', drive)
     );
 
-    const snapshot = await getDocs(q);
-    const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    setSuggestedProducts(products);
+    await getDocs(q); // Optional: setSuggestedProducts if you display suggestions
     setLoading(false);
-
-    // Redirect and pass filters to dashboard
     navigate('/user-dashboard', { state: filters });
   };
 
@@ -140,30 +135,20 @@ const Fitment = () => {
         </div>
 
         <div className="fitment-form">
-          <select name="year" className="fitment-select" value={filters.year} onChange={handleChange}>
-            <option value="">YEAR</option>
-            {options.years.map((y) => <option key={y} value={y}>{y}</option>)}
-          </select>
-
-          <select name="make" className="fitment-select" value={filters.make} onChange={handleChange}>
-            <option value="">MAKE</option>
-            {options.makes.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-
-          <select name="model" className="fitment-select" value={filters.model} onChange={handleChange}>
-            <option value="">MODEL</option>
-            {options.models.map((m) => <option key={m} value={m}>{m}</option>)}
-          </select>
-
-          <select name="trim" className="fitment-select" value={filters.trim} onChange={handleChange}>
-            <option value="">TRIM</option>
-            {options.trims.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
-
-          <select name="drive" className="fitment-select" value={filters.drive} onChange={handleChange}>
-            <option value="">DRIVE</option>
-            {options.drives.map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
+          {['year', 'make', 'model', 'trim', 'drive'].map((key) => (
+            <select
+              key={key}
+              name={key}
+              className="fitment-select"
+              value={filters[key]}
+              onChange={handleChange}
+            >
+              <option value="">{key.toUpperCase()}</option>
+              {options[key + 's'].map(val => (
+                <option key={val} value={val}>{val}</option>
+              ))}
+            </select>
+          ))}
 
           <button className="fitment-button" onClick={handleShowResults} disabled={loading}>
             {loading ? 'Loading...' : 'SHOP NOW'}
