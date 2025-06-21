@@ -50,7 +50,7 @@ const NotificationPanel = ({ notifications, onClose }) => {
       console.error('Failed to mark notification as read:', error);
     }
     onClose(); // Close the panel before redirect
-    navigate("/profile?tab=reservations");
+    navigate("/profile?tab=reservations"); // go to profile and reservations
 
   };
 
@@ -59,12 +59,12 @@ const NotificationPanel = ({ notifications, onClose }) => {
       <div className="notification-panel" onClick={(e) => e.stopPropagation()}>
         <div className="notification-header">
           <h3>Notifications</h3>
-          <button className="close-button" onClick={handleClose}>
+          <button className="close-button" onClick={handleClose}> 
             &times;
           </button>
         </div>
 
-        <div className="notification-body">
+        <div className="notification-body"> 
           {notifications.length === 0 ? (
             <p className="no-notifications">You're all caught up!</p>
           ) : (

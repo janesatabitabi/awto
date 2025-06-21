@@ -106,7 +106,7 @@ const UserProfile = () => {
     <div className="user-profile-page">
       <aside className="profile-sidebar">
         <button className="back-home" onClick={() => navigate("/")}>
-          ← Back to Home
+          ← Back
         </button>
 
         <h2>My Account</h2>
