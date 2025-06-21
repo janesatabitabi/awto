@@ -14,14 +14,14 @@ const StaffLayout = ({ children }) => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="staff-dashboard-container">
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="logo-section">
           <h1 className="logo">AWTO Staff</h1>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className="staff-sidebar-nav">
           <NavLink to="/staff-dashboard" className="nav-link">
             <FiHome className="icon" />
             <span>Dashboard</span>
@@ -47,7 +47,7 @@ const StaffLayout = ({ children }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="main-content">
+      <main className="staff-main-content">
         {children}
       </main>
     </div>

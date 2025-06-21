@@ -1,6 +1,5 @@
-// src/pages/user-page/UserProfile.jsx
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { auth, db, storage } from "../../firebase";
 import {
   doc,
@@ -21,12 +20,13 @@ import "../../styles/UserProfile.css";
 
 const UserProfile = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userData, setUserData] = useState({});
   const [photoURL, setPhotoURL] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("profile");
-  const [orders, setOrders] = useState([]);
+  const [reservations, setReservations] = useState([]);
 
   const fetchUserData = async (uid) => {
     const userRef = doc(db, "users", uid);
@@ -37,21 +37,21 @@ const UserProfile = () => {
     }
   };
 
-  const fetchUserOrders = async (uid) => {
+  const fetchUserReservations = async (uid) => {
     const q = query(collection(db, "reservations"), where("userId", "==", uid));
     const querySnapshot = await getDocs(q);
-    const userOrders = [];
+    const userReservations = [];
     querySnapshot.forEach((doc) => {
-      userOrders.push({ id: doc.id, ...doc.data() });
+      userReservations.push({ id: doc.id, ...doc.data() });
     });
-    setOrders(userOrders);
+    setReservations(userReservations);
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         await fetchUserData(user.uid);
-        await fetchUserOrders(user.uid);
+        await fetchUserReservations(user.uid);
         setLoading(false);
       } else {
         navigate("/login");
@@ -60,6 +60,14 @@ const UserProfile = () => {
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const tabFromQuery = queryParams.get("tab");
+    if (tabFromQuery) {
+      setActiveTab(tabFromQuery);
+    }
+  }, [location.search]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -97,6 +105,10 @@ const UserProfile = () => {
   return (
     <div className="user-profile-page">
       <aside className="profile-sidebar">
+        <button className="back-home" onClick={() => navigate("/")}>
+          ← Back to Home
+        </button>
+
         <h2>My Account</h2>
         <ul>
           <li
@@ -106,10 +118,10 @@ const UserProfile = () => {
             Profile
           </li>
           <li
-            className={activeTab === "orders" ? "active" : ""}
-            onClick={() => setActiveTab("orders")}
+            className={activeTab === "reservations" ? "active" : ""}
+            onClick={() => setActiveTab("reservations")}
           >
-            Orders
+            Reservations
           </li>
           <li onClick={() => auth.signOut()}>Logout</li>
         </ul>
@@ -164,23 +176,23 @@ const UserProfile = () => {
           </>
         )}
 
-        {activeTab === "orders" && (
+        {activeTab === "reservations" && (
           <>
-            <h2>My Orders</h2>
-            {orders.length === 0 ? (
-              <p>No orders found.</p>
+            <h2>My Reservations</h2>
+            {reservations.length === 0 ? (
+              <p>No reservations found.</p>
             ) : (
               <div className="orders-list">
-                {orders.map((order) => (
-                  <div key={order.id} className="order-card">
-                    <p><strong>Product:</strong> {order.productName}</p>
-                    <p><strong>Brand:</strong> {order.brand}</p>
-                    <p><strong>Size:</strong> {order.size}</p>
-                    <p><strong>Date:</strong> {order.preferredDateTime}</p>
-                    <p><strong>Status:</strong> {order.status}</p>
+                {reservations.map((res) => (
+                  <div key={res.id} className="order-card">
+                    <p><strong>Product:</strong> {res.productName}</p>
+                    <p><strong>Brand:</strong> {res.brand}</p>
+                    <p><strong>Size:</strong> {res.size}</p>
+                    <p><strong>Date:</strong> {res.preferredDateTime}</p>
+                    <p><strong>Status:</strong> {res.status}</p>
                     <button
                       className="invoice-button"
-                      onClick={() => navigate(`/invoice/${order.id}`)}
+                      onClick={() => navigate(`/invoice/${res.id}`)}
                     >
                       View Invoice
                     </button>

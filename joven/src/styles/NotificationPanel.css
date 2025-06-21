@@ -1,0 +1,103 @@
+/* Notification Panel Styles */
+
+.notification-panel-overlay {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  z-index: 1000;
+  background: transparent;
+}
+
+.notification-panel {
+  width: 320px;
+  max-height: 400px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
+  animation: fadeInSlide 0.3s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.notification-header {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.notification-body {
+  padding: 0.75rem 1rem;
+}
+
+.no-notifications {
+  text-align: center;
+  color: #888;
+  padding: 1rem 0;
+}
+
+.notification-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.notification-item {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-message {
+  font-size: 0.95rem;
+  color: #333;
+  margin: 0;
+}
+
+.notification-timestamp {
+  font-size: 0.75rem;
+  color: #999;
+  margin-top: 4px;
+}
+
+@keyframes fadeInSlide {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-button {
+  margin-top: 0.25rem;
+  padding: 6px 10px;
+  background-color: #1d4ed8;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.view-button:hover {
+  background-color: #2563eb;
+}
