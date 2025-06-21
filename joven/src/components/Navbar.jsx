@@ -5,40 +5,76 @@ import { FaBars } from 'react-icons/fa';
 import { FiBell, FiShoppingCart } from 'react-icons/fi';
 import jovenLogo from '../assets/jovenlogo.png';
 import { auth, db } from '../firebase';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot,
+  orderBy,
+} from 'firebase/firestore';
 import '../styles/Navbar.css';
+
 import LoginSection from './LoginSection';
+import NotificationPanel from './NotificationPanel';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dropdownRef = useRef(null);
+
   const [showLogin, setShowLogin] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [cartCount, setCartCount] = useState(0);
-  const dropdownRef = useRef(null);
-  const notificationCount = 3; // Placeholder
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const docRef = doc(db, 'users', currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        }
+    let unsubscribeAuth;
+    let unsubscribeNotif;
 
-        // Get cart items count
-        const cartRef = collection(db, 'cartSelections');
-        const q = query(cartRef, where('userId', '==', currentUser.uid));
-        const snapshot = await getDocs(q);
-        setCartCount(snapshot.size);
+    unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+
+      if (currentUser) {
+        // Fetch user profile
+        const userRef = doc(db, 'users', currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) setUserData(userSnap.data());
+
+        // Fetch cart selections count
+        const cartQuery = query(
+          collection(db, 'cartSelections'),
+          where('userId', '==', currentUser.uid)
+        );
+        const cartSnap = await getDocs(cartQuery);
+        setCartCount(cartSnap.size);
+
+        // Real-time notifications
+        const notifQuery = query(
+          collection(db, 'notifications'),
+          where('userId', '==', currentUser.uid),
+          orderBy('createdAt', 'desc')
+        );
+        unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
+          const notifList = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          setNotifications(notifList);
+        });
       }
     });
-    return () => unsubscribe();
+
+    return () => {
+      if (unsubscribeAuth) unsubscribeAuth();
+      if (unsubscribeNotif) unsubscribeNotif();
+    };
   }, []);
 
   useEffect(() => {
@@ -68,6 +104,8 @@ const Navbar = () => {
     setShowLogin(false);
   };
 
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
+
   return (
     <>
       <nav className="navbar">
@@ -87,10 +125,15 @@ const Navbar = () => {
           <a href="#about" className="nav-link" onClick={() => setMenuOpen(false)}>About</a>
 
           <div className="icon-buttons">
-            <button className="icon-button" title="Notifications">
+            <button
+              className="icon-button"
+              title="Notifications"
+              onClick={() => setShowNotifications(prev => !prev)}
+            >
               <FiBell size={20} />
-              {notificationCount > 0 && <span className="badge">{notificationCount}</span>}
+              {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
             </button>
+
             <button
               className="icon-button"
               title="My Selections"
@@ -103,7 +146,7 @@ const Navbar = () => {
 
           {user ? (
             <div className="profile-dropdown" ref={dropdownRef}>
-              <button className="profile-info" onClick={() => setShowDropdown((prev) => !prev)}>
+              <button className="profile-info" onClick={() => setShowDropdown(prev => !prev)}>
                 {user.displayName || user.email}
               </button>
               {showDropdown && (
@@ -150,6 +193,13 @@ const Navbar = () => {
             />
           </div>
         </div>
+      )}
+
+      {showNotifications && (
+        <NotificationPanel
+          notifications={notifications}
+          onClose={() => setShowNotifications(false)}
+        />
       )}
     </>
   );

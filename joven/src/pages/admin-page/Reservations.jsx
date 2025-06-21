@@ -10,6 +10,8 @@ import {
   serverTimestamp,
   getDocs,
   setDoc,
+  addDoc,
+  Timestamp,
 } from "firebase/firestore";
 import "../../styles/admin-styles/Reservations.css";
 
@@ -34,14 +36,27 @@ const Reservations = () => {
       const reservationRef = doc(db, "reservations", id);
       const updateData = { status: newStatus };
 
+      const reservation = reservations.find((r) => r.id === id);
+
       if (newStatus === "Approved") {
         updateData.approvedAt = serverTimestamp();
+
+        if (reservation?.userId) {
+          await addDoc(collection(db, "notifications"), {
+            userId: reservation.userId,
+            message: `Your reservation (${id}) has been approved.`,
+            type: "reservation",
+            createdAt: Timestamp.now(),
+            isRead: false,
+          });
+          console.log("Notification sent to user:", reservation.userId);
+        }
       }
 
       await updateDoc(reservationRef, updateData);
       console.log("Status updated");
     } catch (error) {
-      console.error("Error updating status:", error);
+      console.error("Error updating status or sending notification:", error);
     }
   };
 
@@ -51,7 +66,6 @@ const Reservations = () => {
         await deleteDoc(doc(db, "reservations", id));
         console.log("Reservation deleted");
 
-        // Check if empty
         const resSnap = await getDocs(collection(db, "reservations"));
         if (resSnap.empty) {
           await resetReservationCounter();
