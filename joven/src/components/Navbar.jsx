@@ -11,7 +11,6 @@ import {
   collection,
   query,
   where,
-  getDocs,
   onSnapshot,
   orderBy,
 } from 'firebase/firestore';
@@ -35,46 +34,45 @@ const Navbar = () => {
   const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
-    let unsubscribeAuth;
-    let unsubscribeNotif;
-
-    unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
 
       if (currentUser) {
-        // Fetch user profile
         const userRef = doc(db, 'users', currentUser.uid);
         const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) setUserData(userSnap.data());
+        if (userSnap.exists()) {
+          setUserData(userSnap.data());
+        }
 
-        // Fetch cart selections count
         const cartQuery = query(
           collection(db, 'cartSelections'),
           where('userId', '==', currentUser.uid)
         );
-        const cartSnap = await getDocs(cartQuery);
-        setCartCount(cartSnap.size);
+        const unsubscribeCart = onSnapshot(cartQuery, (snapshot) => {
+          setCartCount(snapshot.size);
+        });
 
-        // Real-time notifications
         const notifQuery = query(
           collection(db, 'notifications'),
           where('userId', '==', currentUser.uid),
           orderBy('createdAt', 'desc')
         );
-        unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
+        const unsubscribeNotif = onSnapshot(notifQuery, (snapshot) => {
           const notifList = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
           setNotifications(notifList);
         });
+
+        return () => {
+          unsubscribeCart();
+          unsubscribeNotif();
+        };
       }
     });
 
-    return () => {
-      if (unsubscribeAuth) unsubscribeAuth();
-      if (unsubscribeNotif) unsubscribeNotif();
-    };
+    return () => unsubscribeAuth();
   }, []);
 
   useEffect(() => {
@@ -154,7 +152,7 @@ const Navbar = () => {
                   <button className="dropdown-item" onClick={() => goToProfileTab('profile')}>
                     View Profile
                   </button>
-                  <button className="dropdown-item" onClick={() => goToProfileTab('orders')}>
+                  <button className="dropdown-item" onClick={() => goToProfileTab('reservations')}>
                     Orders
                   </button>
                   <button className="dropdown-item" onClick={() => goToProfileTab('payment')}>
